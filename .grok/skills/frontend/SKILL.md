@@ -3,8 +3,8 @@ name: frontend
 description: >-
   Component conventions for ng-fixit: Angular 22 standalone library components,
   OnPush, .ts + .html split files, fix- selector prefix, public-api discipline,
-  component-scoped styles for overlay chrome. Use when scaffolding or modifying
-  code under projects/ng-fixit/**.
+  plain CSS in a single global styles.css (no per-component CSS). Use when
+  scaffolding or modifying code under projects/ng-fixit/**.
 ---
 
 # frontend — ng-fixit library conventions
@@ -20,7 +20,7 @@ Every Angular component MUST be split into two files:
 - `foo.ts` — the `@Component` class
 - `foo.html` — the template
 
-**Never** use inline templates (no `template: \`...\``). Prefer a sibling `.css` file over inline `styles: [...]` when styles are non-trivial.
+**Never** use inline templates (no `template: \`...\``). **Never** add `styleUrl`, `styleUrls`, or `styles: [...]` — all styles go in the global stylesheet.
 
 ```ts
 import { ChangeDetectionStrategy, Component } from '@angular/core';
@@ -28,7 +28,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 @Component({
   selector: 'fix-annotation-list',
   templateUrl: './annotation-list.html',
-  styleUrl: './annotation-list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnnotationList {}
@@ -66,11 +65,15 @@ When a template lists a collection that may be empty, prefer **`@for` with `@emp
 
 Use `@if` for true conditionals (flags, optional models, mutually exclusive layouts) — not as a substitute for empty-list rendering.
 
-## Styling — component-scoped, host-safe
+## Styling — single global `styles.css`
 
-- Overlay chrome, highlights, and panels may use `styleUrl` / encapsulated CSS.
-- Prefer encapsulation so host app styles are not polluted and library styles do not leak globally unless intentional (e.g. a documented highlight class on host elements — keep that surface minimal).
-- Do not introduce Tailwind, Taiga, or Material unless the user explicitly requests it.
+- **Sole stylesheet**: `projects/ng-fixit/src/styles.css`.
+- **No per-component CSS**: never `styleUrl` / `styleUrls` / `styles: [...]`, never sibling `component.css`.
+- Put overlay chrome, highlights, panels, and tokens in that file.
+- Scope under `.fix-root` and prefer `fix-` class names so the host app is not restyled by accident.
+- Templates: bind those class names (`class="fix-annotation-list"`). Use `class` / `style` bindings, not `ngClass` / `ngStyle`.
+- No Tailwind, Sass/SCSS pipeline, or UI-kit themes.
+- Ensure the published package exposes this CSS and hosts import it once (document in package README when wiring the build).
 
 ## Generation — use `ng g`
 
@@ -82,7 +85,7 @@ pnpm ng generate service annotation-store --project=ng-fixit
 pnpm ng generate pipe locator-label --project=ng-fixit
 ```
 
-After generation, verify: external template, `ChangeDetectionStrategy.OnPush`, `fix-` selector, no NgModule. Adjust generated paths into a clear folder layout under `src/lib/` as the library grows.
+After generation, verify: external template, **no** `styleUrl` / generated `.css`, `ChangeDetectionStrategy.OnPush`, `fix-` selector, no NgModule. Delete any CLI-generated component stylesheet and keep styles in `src/styles.css`. Adjust generated paths into a clear folder layout under `src/lib/` as the library grows.
 
 ## Standalone-only — no NgModules
 

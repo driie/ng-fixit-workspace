@@ -24,6 +24,7 @@ Angular workspace with one publishable library:
 
 - `projects/ng-fixit/` — library root (`ng-packagr`)
 - `projects/ng-fixit/src/lib/` — library source
+- `projects/ng-fixit/src/styles.css` — sole stylesheet (plain CSS; no per-component CSS)
 - `projects/ng-fixit/src/public-api.ts` — public API surface (only export what consumers may use)
 - `GLOSSARY.md` — shared product language
 - `.grok/` — project rules, skills, MCP config
@@ -44,6 +45,7 @@ Use **pnpm** only. Do not reintroduce `package-lock.json`.
 ## Architecture & Constraints
 
 - **Library, not an app**: Implement features inside `projects/ng-fixit/`. Do not scaffold a host SPA unless the user explicitly asks for a demo app.
+- **Plain CSS styling**: Single global `projects/ng-fixit/src/styles.css` only. No per-component CSS, no Tailwind.
 - **Development-only runtime**: Gate activation with `isDevMode()` (or an equivalent host-provided flag). Production builds must not enable Annotation Mode by default.
 - **v1 product shape** (see README): Annotation Mode toggle, single-element Target, required note per Annotation, list CRUD (no reorder), copy Report as Markdown, in-memory tab lifetime. Out of v1: screenshots, persistence, freeform regions, live agent/MCP bridge.
 - **Signals** for local UI/library state; standalone Angular APIs only (no NgModules).

@@ -10,6 +10,7 @@ Mandatory for any work under the library source tree.
 ## Stack Snapshot
 
 - **Angular 22** library (`ng-packagr`), standalone-only, signals, `@if` / `@for` / `@empty` control flow.
+- **Styling**: plain CSS in a **single global** `styles.css` (no per-component CSS, no Tailwind, no CSS-in-JS)
 - **Prefix**: `fix`
 - **Tests**: Vitest via `pnpm test` / `ng test`
 - **Domain language**: `GLOSSARY.md`
@@ -23,12 +24,15 @@ Mandatory for any work under the library source tree.
 5. **Never enable production annotation by default**: Gate with `isDevMode()` or an explicit host-provided flag.
 6. **Never non-English source**: Every piece of code is English — identifiers, strings, UI copy, messages, tests. Full policy: `project.md`.
 
-## Styling stance
+## Styling — single global plain CSS
 
-- Component-scoped styles (`styleUrl` / `styleUrls`) are **allowed** for overlay chrome, highlights, and panels.
-- Prefer encapsulation defaults; avoid leaking global styles into the host app.
-- Do **not** add Tailwind, Taiga, or a monorepo-wide design-token pipeline unless the user asks.
-- Avoid inline `styles: [...]` for non-trivial CSS — use a sibling `.css` file.
+- **One stylesheet only**: `projects/ng-fixit/src/styles.css` is the sole place for library styles (tokens, overlay chrome, highlights, panels, animations).
+- **No per-component CSS**: Do not add `styleUrl`, `styleUrls`, or `styles: [...]` on components. Do not create sibling `*.css` next to components.
+- **No other CSS files** under `projects/ng-fixit/**` except that global `styles.css`.
+- Templates use **class names** defined in `styles.css` (prefer a `fix-` prefix / root scope such as `.fix-root` so rules do not restyle the host app).
+- Prefer `class` / `style` bindings over `ngClass` / `ngStyle`.
+- Do not introduce Tailwind, Sass/SCSS pipelines, CSS modules, or UI-kit theme systems.
+- Host apps must load the library stylesheet once (e.g. import `ng-fixit/styles.css` or the path documented in the package README) so global rules apply.
 
 ## TypeScript & specs
 

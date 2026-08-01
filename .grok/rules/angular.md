@@ -16,7 +16,7 @@ These take precedence over generic Angular guidance:
 - **Selector prefix `fix`** — all component selectors use the `fix-` prefix (workspace `prefix` is `fix`).
 - **Library public API** — only re-export intentional symbols from `projects/ng-fixit/src/public-api.ts`.
 - **No app UI kit dependency** — do not introduce Taiga, Material, or similar as library peers unless explicitly requested. Prefer Angular primitives and focused custom overlay UI.
-- **Component styles allowed** — overlay chrome may use `styleUrl` / encapsulated styles. Prefer one stylesheet per component when styles are non-trivial. Do not introduce Tailwind or a global theme pipeline unless requested.
+- **Plain CSS, single global file** — all styles live in `projects/ng-fixit/src/styles.css`. No `styleUrl` / `styleUrls` / `styles: [...]` on components. No Tailwind or Sass/SCSS pipeline. Scope rules under `.fix-root` / `fix-` class names.
 
 ## TypeScript file style
 
