@@ -1,0 +1,6 @@
+# Project-scoped MCP servers (Angular CLI only; no UI-kit or DB tooling)
+
+[mcp_servers.angular]
+command = "npx"
+args = ["-y", "@angular/cli", "mcp"]
+enabled = true
