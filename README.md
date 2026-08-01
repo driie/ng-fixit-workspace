@@ -1,59 +1,78 @@
-# NgFixitWorkspace
+# ng-fixit
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.2.
+Development-only Angular library that turns visual UI selections and correction notes into paste-ready Markdown for AI coding agents.
 
-## Development server
+Mount a drop-in root component, enter **Annotation Mode**, select a **Target**, add a required correction note, then copy a **Report** into your agent.
 
-To start a local development server, run:
+Domain terms live in [`GLOSSARY.md`](./GLOSSARY.md).
 
-```bash
-ng serve
+## Status
+
+Early workspace. Domain language and v1 product shape are defined; library implementation is in progress.
+
+| | |
+| --- | --- |
+| Package | `ng-fixit` |
+| Stack | Angular 22, TypeScript ~6, Vitest, pnpm |
+| Prefix | `fix` |
+| Runtime | Development only (`isDevMode` / equivalent host gate) |
+
+## Workspace layout
+
+```text
+projects/ng-fixit/     # publishable library
+  src/lib/              # library source
+  src/public-api.ts     # public API surface
+GLOSSARY.md             # canonical domain language
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Prerequisites
 
-## Code scaffolding
+- Node.js (compatible with Angular 22)
+- [pnpm](https://pnpm.io/) 10.x
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Setup
 
 ```bash
-ng generate --help
+pnpm install
 ```
 
-## Building
-
-To build the project run:
+## Build
 
 ```bash
-ng build
+pnpm build          # or: pnpm ng build ng-fixit
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Output lands in `dist/ng-fixit/`.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Watch mode:
 
 ```bash
-ng test
+pnpm watch
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+## Test
 
 ```bash
-ng e2e
+pnpm test           # Vitest via Angular unit-test builder
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## v1 shape (planned)
 
-## Additional Resources
+- **Drop-in UI** — shell-mounted root component owns overlay chrome, Annotation Mode toggle, Annotation list, and copy Report
+- **Annotation Mode** — explicit toggle; when off, the host app receives normal clicks
+- **Target** — single DOM element (hover highlight + click)
+- **Annotation** — Target + required correction note; full CRUD in the list (no reorder)
+- **Report** — structured Markdown (Locator, note, light context including Host Component when discoverable); copy does not clear working Annotations
+- **Lifetime** — in-memory for the current tab; reload clears state
+- **Out of v1** — screenshots, persistence, freeform regions, live agent/MCP bridge
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Contributing notes
+
+- Use **pnpm** only (do not reintroduce `package-lock.json`)
+- Prefer terms from `GLOSSARY.md` in code, UI copy, and docs
+- Library selector prefix is `fix`
+
+## License
+
+Private / unpublished for now.
