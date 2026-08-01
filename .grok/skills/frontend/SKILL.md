@@ -2,7 +2,7 @@
 name: frontend
 description: >-
   Component conventions for ng-fixit: Angular 22 standalone library components,
-  OnPush, .ts + .html split files, fix- selector prefix, public-api discipline,
+  OnPush, .ts + .html split files, fixit- selector prefix, public-api discipline,
   plain CSS in a single global styles.css (no per-component CSS). Use when
   scaffolding or modifying code under projects/ng-fixit/**.
 ---
@@ -26,7 +26,7 @@ Every Angular component MUST be split into two files:
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'fix-annotation-list',
+  selector: 'fixit-annotation-list',
   templateUrl: './annotation-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -35,9 +35,9 @@ export class AnnotationList {}
 
 **Exempt**: templateless artifacts (directives, services, pipes).
 
-## Selectors — `fix-` prefix
+## Selectors — `fixit-` prefix
 
-Workspace prefix is `fix`. Examples: `fix-root`, `fix-annotation-list`, `fix-target-highlight`.
+Workspace prefix is `fixit`. Generated and internal components use `fixit-` (e.g. `fixit-annotation-list`, `fixit-target-highlight`). The public drop-in root is an intentional exception: selector **`ng-fixit`**, class `NgFixit`.
 
 Do not use `app-` selectors inside the library.
 
@@ -70,8 +70,8 @@ Use `@if` for true conditionals (flags, optional models, mutually exclusive layo
 - **Sole stylesheet**: `projects/ng-fixit/src/styles.css`.
 - **No per-component CSS**: never `styleUrl` / `styleUrls` / `styles: [...]`, never sibling `component.css`.
 - Put overlay chrome, highlights, panels, and tokens in that file.
-- Scope under `.fix-root` and prefer `fix-` class names so the host app is not restyled by accident.
-- Templates: bind those class names (`class="fix-annotation-list"`). Use `class` / `style` bindings, not `ngClass` / `ngStyle`.
+- Scope under `.fixit-root` and prefer `fixit-` class names so the host app is not restyled by accident.
+- Templates: bind those class names (`class="fixit-annotation-list"`). Use `class` / `style` bindings, not `ngClass` / `ngStyle`.
 - No Tailwind, Sass/SCSS pipeline, or UI-kit themes.
 - Ensure the published package exposes this CSS and hosts import it once (document in package README when wiring the build).
 
@@ -85,7 +85,7 @@ pnpm ng generate service annotation-store --project=ng-fixit
 pnpm ng generate pipe locator-label --project=ng-fixit
 ```
 
-After generation, verify: external template, **no** `styleUrl` / generated `.css`, `ChangeDetectionStrategy.OnPush`, `fix-` selector, no NgModule. Delete any CLI-generated component stylesheet and keep styles in `src/styles.css`. Adjust generated paths into a clear folder layout under `src/lib/` as the library grows.
+After generation, verify: external template, **no** `styleUrl` / generated `.css`, `ChangeDetectionStrategy.OnPush`, `fixit-` selector (except public root `ng-fixit`), no NgModule. Delete any CLI-generated component stylesheet and keep styles in `src/styles.css`. Adjust generated paths into a clear folder layout under `src/lib/` as the library grows.
 
 ## Standalone-only — no NgModules
 

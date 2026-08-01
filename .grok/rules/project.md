@@ -29,7 +29,7 @@ Angular workspace with one publishable library:
 - `GLOSSARY.md` — shared product language
 - `.grok/` — project rules, skills, MCP config
 
-Selector prefix: **`fix`**.
+Selector prefix: **`fixit`**. Public drop-in root selector: **`ng-fixit`**.
 
 ## Commands
 

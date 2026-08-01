@@ -14,7 +14,7 @@ Early workspace. Domain language and v1 product shape are defined; library imple
 | --- | --- |
 | Package | `ng-fixit` |
 | Stack | Angular 22, TypeScript ~6, Vitest, pnpm |
-| Prefix | `fix` |
+| Prefix | `fixit` (public root selector: `ng-fixit`) |
 | Runtime | Development only (`isDevMode` / equivalent host gate) |
 
 ## Workspace layout
@@ -71,7 +71,7 @@ pnpm test           # Vitest via Angular unit-test builder
 
 - Use **pnpm** only (do not reintroduce `package-lock.json`)
 - Prefer terms from `GLOSSARY.md` in code, UI copy, and docs
-- Library selector prefix is `fix`
+- Library selector prefix is `fixit`; public drop-in root uses selector `ng-fixit`
 
 ## License
 

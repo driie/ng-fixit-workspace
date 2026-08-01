@@ -139,7 +139,7 @@ Use arrow-function callbacks in array methods (`arrow-functions.md`). `@for` in 
 | Model signals    | `<noun>Model` or domain noun            | `draftNote`, `activeTarget`                                                       |
 | Module constants | `SCREAMING_SNAKE`                       | `REPORT_MIME_TYPE`, `DEFAULT_HIGHLIGHT_Z`                                         |
 | Files / folders  | kebab-case                              | `annotation-list.ts`, `report-builder.ts`                                         |
-| Selectors        | `fix-` + kebab-case                    | `fix-root`, `fix-annotation-list`                                                 |
+| Selectors        | `fixit-` + kebab-case (root: `ng-fixit`) | `ng-fixit`, `fixit-annotation-list`                                               |
 
 ## Spec files (`*.spec.ts`)
 

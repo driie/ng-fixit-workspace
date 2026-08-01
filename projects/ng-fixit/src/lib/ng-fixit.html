@@ -1,0 +1,13 @@
+@if (enabled) {
+  <div class="fixit-chrome">
+    <button
+      type="button"
+      class="fixit-annotation-mode-toggle"
+      data-fixit-annotation-mode-toggle
+      [attr.aria-pressed]="annotationModePressed()"
+      (click)="toggleAnnotationMode()"
+    >
+      Annotation Mode
+    </button>
+  </div>
+}

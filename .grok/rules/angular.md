@@ -13,10 +13,10 @@ These take precedence over generic Angular guidance:
 
 - **External templates only** — every component has a separate `.html` file (no inline templates).
 - **OnPush always** — `changeDetection: ChangeDetectionStrategy.OnPush` on every component.
-- **Selector prefix `fix`** — all component selectors use the `fix-` prefix (workspace `prefix` is `fix`).
+- **Selector prefix `fixit`** — workspace `prefix` is `fixit`. Component selectors use the `fixit-` prefix, except the public drop-in root which uses **`ng-fixit`**.
 - **Library public API** — only re-export intentional symbols from `projects/ng-fixit/src/public-api.ts`.
 - **No app UI kit dependency** — do not introduce Taiga, Material, or similar as library peers unless explicitly requested. Prefer Angular primitives and focused custom overlay UI.
-- **Plain CSS, single global file** — all styles live in `projects/ng-fixit/src/styles.css`. No `styleUrl` / `styleUrls` / `styles: [...]` on components. No Tailwind or Sass/SCSS pipeline. Scope rules under `.fix-root` / `fix-` class names.
+- **Plain CSS, single global file** — all styles live in `projects/ng-fixit/src/styles.css`. No `styleUrl` / `styleUrls` / `styles: [...]` on components. No Tailwind or Sass/SCSS pipeline. Scope rules under `.fixit-root` / `fixit-` class names.
 
 ## TypeScript file style
 
