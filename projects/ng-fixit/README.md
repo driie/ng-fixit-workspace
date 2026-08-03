@@ -10,7 +10,7 @@ import { NgFixit } from 'ng-fixit';
 
 ```html
 @if (isDevMode()) {
-  <ng-fixit />
+<ng-fixit />
 }
 ```
 

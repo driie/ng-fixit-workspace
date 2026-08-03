@@ -35,9 +35,7 @@ annotations.reduce((markdown, annotation) => markdown + formatAnnotation(annotat
 - **Async helpers**:
 
 ```typescript
-export const configureFixitTestingModule = async (
-  imports: Type<unknown>[] = [],
-): Promise<void> => {
+export const configureFixitTestingModule = async (imports: Type<unknown>[] = []): Promise<void> => {
   await TestBed.configureTestingModule({
     imports,
   }).compileComponents();
@@ -54,7 +52,9 @@ export const configureFixitTestingModule = async (
 ```typescript
 // ❌ function declaration
 export function buildLocator(element: Element): Locator {
-  return { /* … */ };
+  return {
+    /* … */
+  };
 }
 
 // ❌ named function expression
@@ -66,7 +66,9 @@ const handler = function onClick() {};
 ```typescript
 // ✅ arrow assigned to const
 export const buildLocator = (element: Element): Locator => {
-  return { /* … */ };
+  return {
+    /* … */
+  };
 };
 
 // ✅ inline callback

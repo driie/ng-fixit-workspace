@@ -7,9 +7,7 @@ import { NG_FIXIT_ENABLED, NgFixit } from './ng-fixit';
 @Component({
   imports: [NgFixit],
   template: `
-    <button type="button" data-host-button (click)="hostClicks = hostClicks + 1">
-      Host
-    </button>
+    <button type="button" data-host-button (click)="hostClicks = hostClicks + 1">Host</button>
     <ng-fixit />
   `,
 })
@@ -30,9 +28,7 @@ describe('NgFixit', () => {
   });
 
   it('shows Annotation Mode toggle chrome when mounted', () => {
-    const toggle = fixture.nativeElement.querySelector(
-      '[data-fixit-annotation-mode-toggle]',
-    );
+    const toggle = fixture.nativeElement.querySelector('[data-fixit-annotation-mode-toggle]');
 
     expect(toggle).not.toBeNull();
   });
@@ -41,9 +37,7 @@ describe('NgFixit', () => {
     const toggle = annotationModeToggle();
 
     expect(toggle.getAttribute('aria-pressed')).toBe('false');
-    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe(
-      'off',
-    );
+    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
   });
 
   it('turns Annotation Mode on when the toggle is activated', async () => {
@@ -51,9 +45,7 @@ describe('NgFixit', () => {
     await fixture.whenStable();
 
     expect(annotationModeToggle().getAttribute('aria-pressed')).toBe('true');
-    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe(
-      'on',
-    );
+    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('on');
   });
 
   it('turns Annotation Mode off when the toggle is activated again', async () => {
@@ -63,9 +55,7 @@ describe('NgFixit', () => {
     await fixture.whenStable();
 
     expect(annotationModeToggle().getAttribute('aria-pressed')).toBe('false');
-    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe(
-      'off',
-    );
+    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
   });
 
   it('lets host content receive clicks when Annotation Mode is off', async () => {
@@ -111,9 +101,7 @@ describe('NgFixit when disabled', () => {
     const fixture = TestBed.createComponent(NgFixit);
     await fixture.whenStable();
 
-    const toggle = fixture.nativeElement.querySelector(
-      '[data-fixit-annotation-mode-toggle]',
-    );
+    const toggle = fixture.nativeElement.querySelector('[data-fixit-annotation-mode-toggle]');
 
     expect(toggle).toBeNull();
   });

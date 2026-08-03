@@ -56,9 +56,9 @@ When a template lists a collection that may be empty, prefer **`@for` with `@emp
 ```html
 <ul>
   @for (annotation of annotations(); track annotation.id) {
-    <li>{{ annotation.note }}</li>
+  <li>{{ annotation.note }}</li>
   } @empty {
-    <li>No annotations yet</li>
+  <li>No annotations yet</li>
   }
 </ul>
 ```
@@ -111,14 +111,14 @@ Every piece of code under `projects/ng-fixit/**` is English: identifiers, templa
 
 Keep models aligned with `GLOSSARY.md`:
 
-| Term            | Role                                              |
-| --------------- | ------------------------------------------------- |
-| Annotation      | Target + required correction note                 |
-| Target          | Single DOM element                                |
-| Report          | Structured Markdown for the agent                 |
-| Locator         | How to find the Target again                      |
-| Annotation Mode | Active selection state                            |
-| Host Component  | Nearest Angular component owning/wrapping Target  |
+| Term            | Role                                             |
+| --------------- | ------------------------------------------------ |
+| Annotation      | Target + required correction note                |
+| Target          | Single DOM element                               |
+| Report          | Structured Markdown for the agent                |
+| Locator         | How to find the Target again                     |
+| Annotation Mode | Active selection state                           |
+| Host Component  | Nearest Angular component owning/wrapping Target |
 
 Do not rename these concepts to comment/pin/issue/payload/etc.
 
@@ -150,11 +150,11 @@ Standalone functions and callbacks use arrow syntax. Do not use `function` decla
 
 Name handlers for the **outcome or action**, not the DOM event.
 
-| Prefer                         | Avoid                    |
-| ------------------------------ | ------------------------ |
-| `addAnnotation`, `copyReport`  | `onClick`, `handleSubmit` |
-| `enterAnnotationMode`          | `onToggle`               |
-| `selectTarget`                 | `onElementClick`         |
+| Prefer                        | Avoid                     |
+| ----------------------------- | ------------------------- |
+| `addAnnotation`, `copyReport` | `onClick`, `handleSubmit` |
+| `enterAnnotationMode`         | `onToggle`                |
+| `selectTarget`                | `onElementClick`          |
 
 ## Dev-only gate
 

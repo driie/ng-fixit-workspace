@@ -10,11 +10,11 @@ Domain terms live in [`GLOSSARY.md`](./GLOSSARY.md).
 
 Early workspace. Domain language and v1 product shape are defined; library implementation is in progress.
 
-| | |
-| --- | --- |
-| Package | `ng-fixit` |
-| Stack | Angular 22, TypeScript ~6, Vitest, pnpm |
-| Prefix | `fixit` (public root selector: `ng-fixit`) |
+|         |                                                       |
+| ------- | ----------------------------------------------------- |
+| Package | `ng-fixit`                                            |
+| Stack   | Angular 22, TypeScript ~6, Vitest, pnpm               |
+| Prefix  | `fixit` (public root selector: `ng-fixit`)            |
 | Runtime | Development only (`isDevMode` / equivalent host gate) |
 
 ## Workspace layout
