@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 
 import { AnnotationMode } from './annotation-mode';
 
@@ -6,7 +6,7 @@ import { AnnotationMode } from './annotation-mode';
 export class AnnotationModeStore {
   private readonly modeState = signal<AnnotationMode>(AnnotationMode.Off);
 
-  readonly mode = this.modeState.asReadonly();
+  readonly mode = computed<AnnotationMode>(() => this.modeState());
 
   enterAnnotationMode(): void {
     this.modeState.set(AnnotationMode.On);
