@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "func-style": ["error", "expression", { "allowArrowFunctions": true }]
+  },
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "out/**",
+    "coverage/**",
+    ".angular/**",
+    "out-tsc/**"
+  ],
+  "overrides": [
+    {
+      "files": ["projects/**/*.ts"],
+      "env": {
+        "browser": true
+      },
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "rxjs/operators",
+                "message": "Import operators from 'rxjs' instead of 'rxjs/operators'."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

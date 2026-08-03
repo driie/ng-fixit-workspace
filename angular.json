@@ -10,7 +10,7 @@
       "projectType": "library",
       "root": "projects/ng-fixit",
       "sourceRoot": "projects/ng-fixit/src",
-      "prefix": "fix",
+      "prefix": "fixit",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",

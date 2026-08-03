@@ -1,0 +1,36 @@
+.fixit-root {
+  display: contents;
+}
+
+.fixit-chrome {
+  position: fixed;
+  z-index: 2147483000;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.fixit-annotation-mode-toggle {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #1f2937;
+  border-radius: 999px;
+  background: #111827;
+  color: #f9fafb;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.fixit-annotation-mode-toggle[aria-pressed='true'] {
+  background: #2563eb;
+  border-color: #1d4ed8;
+}
+
+.fixit-annotation-mode-toggle:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}

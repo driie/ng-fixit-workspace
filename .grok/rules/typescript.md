@@ -132,14 +132,14 @@ Use arrow-function callbacks in array methods (`arrow-functions.md`). `@for` in 
 
 ## Naming
 
-| Symbol           | Pattern                                 | Examples                                                                          |
-| ---------------- | --------------------------------------- | --------------------------------------------------------------------------------- |
-| Action handlers  | Describe the outcome, not the DOM event | `addAnnotation`, `copyReport`, `enterAnnotationMode` — not `onClick`, `handleSubmit` |
-| Boolean signals  | State adjective / noun                  | `annotationModeActive`, `hasAnnotations`, `copySucceeded`                         |
-| Model signals    | `<noun>Model` or domain noun            | `draftNote`, `activeTarget`                                                       |
-| Module constants | `SCREAMING_SNAKE`                       | `REPORT_MIME_TYPE`, `DEFAULT_HIGHLIGHT_Z`                                         |
-| Files / folders  | kebab-case                              | `annotation-list.ts`, `report-builder.ts`                                         |
-| Selectors        | `fix-` + kebab-case                    | `fix-root`, `fix-annotation-list`                                                 |
+| Symbol           | Pattern                                  | Examples                                                                             |
+| ---------------- | ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| Action handlers  | Describe the outcome, not the DOM event  | `addAnnotation`, `copyReport`, `enterAnnotationMode` — not `onClick`, `handleSubmit` |
+| Boolean signals  | State adjective / noun                   | `annotationModeActive`, `hasAnnotations`, `copySucceeded`                            |
+| Model signals    | `<noun>Model` or domain noun             | `draftNote`, `activeTarget`                                                          |
+| Module constants | `SCREAMING_SNAKE`                        | `REPORT_MIME_TYPE`, `DEFAULT_HIGHLIGHT_Z`                                            |
+| Files / folders  | kebab-case                               | `annotation-list.ts`, `report-builder.ts`                                            |
+| Selectors        | `fixit-` + kebab-case (root: `ng-fixit`) | `ng-fixit`, `fixit-annotation-list`                                                  |
 
 ## Spec files (`*.spec.ts`)
 

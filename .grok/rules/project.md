@@ -11,9 +11,9 @@ This workspace publishes the library under `projects/ng-fixit/`. It is not a ful
 
 ## Domain & decisions
 
-| Source              | Use                                                                 |
-| ------------------- | ------------------------------------------------------------------- |
-| `GLOSSARY.md`       | Canonical product terms (Annotation, Target, Report, Locator, …)  |
+| Source              | Use                                                                |
+| ------------------- | ------------------------------------------------------------------ |
+| `GLOSSARY.md`       | Canonical product terms (Annotation, Target, Report, Locator, …)   |
 | Engram (`mem_save`) | Architectural decisions, API surface choices, runtime gating notes |
 
 Prefer glossary terms in code, UI copy, commits, and docs. Avoid the glossary’s listed synonyms.
@@ -29,7 +29,7 @@ Angular workspace with one publishable library:
 - `GLOSSARY.md` — shared product language
 - `.grok/` — project rules, skills, MCP config
 
-Selector prefix: **`fix`**.
+Selector prefix: **`fixit`**. Public drop-in root selector: **`ng-fixit`**.
 
 ## Commands
 

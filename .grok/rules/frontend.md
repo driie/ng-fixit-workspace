@@ -11,7 +11,7 @@ Mandatory for any work under the library source tree.
 
 - **Angular 22** library (`ng-packagr`), standalone-only, signals, `@if` / `@for` / `@empty` control flow.
 - **Styling**: plain CSS in a **single global** `styles.css` (no per-component CSS, no Tailwind, no CSS-in-JS)
-- **Prefix**: `fix`
+- **Prefix**: `fixit` (public root selector: `ng-fixit`)
 - **Tests**: Vitest via `pnpm test` / `ng test`
 - **Domain language**: `GLOSSARY.md`
 
@@ -29,7 +29,7 @@ Mandatory for any work under the library source tree.
 - **One stylesheet only**: `projects/ng-fixit/src/styles.css` is the sole place for library styles (tokens, overlay chrome, highlights, panels, animations).
 - **No per-component CSS**: Do not add `styleUrl`, `styleUrls`, or `styles: [...]` on components. Do not create sibling `*.css` next to components.
 - **No other CSS files** under `projects/ng-fixit/**` except that global `styles.css`.
-- Templates use **class names** defined in `styles.css` (prefer a `fix-` prefix / root scope such as `.fix-root` so rules do not restyle the host app).
+- Templates use **class names** defined in `styles.css` (prefer a `fixit-` prefix / root scope such as `.fixit-root` so rules do not restyle the host app).
 - Prefer `class` / `style` bindings over `ngClass` / `ngStyle`.
 - Do not introduce Tailwind, Sass/SCSS pipelines, CSS modules, or UI-kit theme systems.
 - Host apps must load the library stylesheet once (e.g. import `ng-fixit/styles.css` or the path documented in the package README) so global rules apply.
