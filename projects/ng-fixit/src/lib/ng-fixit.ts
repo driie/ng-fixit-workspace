@@ -1,16 +1,19 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   InjectionToken,
   isDevMode,
   signal,
 } from '@angular/core';
 
+import { AnnotationList } from './annotation-list';
 import { AnnotationMode } from './annotation-mode';
-import { AnnotationModeStore } from './annotation-mode-store';
 import { AnnotationSessionStore } from './annotation-session-store';
+import { NoteEntry } from './note-entry';
 import {
   highlightBoxFromElement,
   resolvePointerTarget,
@@ -24,33 +27,36 @@ export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', 
 
 @Component({
   selector: 'ng-fixit',
+  imports: [AnnotationList, NoteEntry],
   templateUrl: './ng-fixit.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [AnnotationModeStore, AnnotationSessionStore],
+  providers: [AnnotationSessionStore],
   host: {
     class: 'fixit-root',
     '[attr.data-fixit-annotation-mode]': 'annotationMode()',
     '(document:pointermove)': 'trackPointerTarget($event)',
     '(document:click)': 'selectTarget($event)',
+    '(window:resize)': 'refreshTargetHighlight()',
   },
 })
 export class NgFixit {
-  private readonly annotationModeStore = inject(AnnotationModeStore);
   private readonly annotationSessionStore = inject(AnnotationSessionStore);
   private readonly libraryEnabled = inject(NG_FIXIT_ENABLED);
+  private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly hoveredTarget = signal<Element | null>(null);
-  private readonly draftNoteState = signal<string>('');
+  private readonly highlightLayoutEpoch = signal<number>(0);
 
   protected readonly enabled = this.libraryEnabled;
-  protected readonly annotationMode = this.annotationModeStore.mode;
+  protected readonly annotationMode = this.annotationSessionStore.mode;
   protected readonly draft = this.annotationSessionStore.draft;
-  protected readonly annotations = this.annotationSessionStore.annotations;
-  protected readonly draftNote = computed<string>(() => this.draftNoteState());
   protected readonly annotationModePressed = computed<boolean>(
     () => this.annotationMode() === AnnotationMode.On,
   );
   protected readonly targetHighlightBox = computed<TargetHighlightBox | null>(() => {
+    this.highlightLayoutEpoch();
+
     if (!this.annotationModePressed()) {
       return null;
     }
@@ -68,11 +74,10 @@ export class NgFixit {
       return;
     }
 
-    this.annotationModeStore.toggleAnnotationMode();
+    this.annotationSessionStore.toggleAnnotationMode();
 
     if (this.annotationMode() === AnnotationMode.Off) {
       this.hoveredTarget.set(null);
-      this.abandonCreate();
     }
   }
 
@@ -81,15 +86,16 @@ export class NgFixit {
       return;
     }
 
-    this.hoveredTarget.set(resolvePointerTarget(event.target));
+    const nextTarget = resolvePointerTarget(event.target);
+    if (nextTarget === this.hoveredTarget()) {
+      return;
+    }
+
+    this.hoveredTarget.set(nextTarget);
   }
 
   selectTarget(event: MouseEvent): void {
     if (!this.libraryEnabled || this.annotationMode() !== AnnotationMode.On) {
-      return;
-    }
-
-    if (this.draft()) {
       return;
     }
 
@@ -98,39 +104,32 @@ export class NgFixit {
       return;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.draftNoteState.set('');
-    this.annotationSessionStore.beginCreate({
-      locatorSummary: target.tagName.toLowerCase(),
-    });
-  }
-
-  updateDraftNote(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLTextAreaElement)) {
+    if (this.draft()) {
       return;
     }
 
-    this.draftNoteState.set(target.value);
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.annotationSessionStore.beginCreate(target.tagName.toLowerCase());
   }
 
-  commitAnnotation(): void {
-    this.annotationSessionStore.commitCreate(this.draftNote());
-    if (!this.draft()) {
-      this.draftNoteState.set('');
+  refreshTargetHighlight(): void {
+    if (!this.hoveredTarget()) {
+      return;
     }
+
+    this.highlightLayoutEpoch.update(epoch => epoch + 1);
   }
 
-  cancelAnnotation(): void {
-    this.abandonCreate();
-  }
+  constructor() {
+    const refreshOnScroll = (): void => {
+      this.refreshTargetHighlight();
+    };
 
-  private abandonCreate(): void {
-    this.annotationSessionStore.cancelCreate();
-    this.draftNoteState.set('');
+    this.document.addEventListener('scroll', refreshOnScroll, true);
+    this.destroyRef.onDestroy(() => {
+      this.document.removeEventListener('scroll', refreshOnScroll, true);
+    });
   }
-
-  protected readonly AnnotationMode = AnnotationMode;
 }

@@ -305,6 +305,52 @@ describe('NgFixit create Annotation', () => {
 
     setItem.mockRestore();
   });
+
+  it('cancels note entry when Escape is pressed', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+    setNoteEntryValue('Will abandon via Escape');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await hostFixture.whenStable();
+
+    expect(annotationListItems()).toEqual([]);
+    expect(noteEntry()).toBeNull();
+  });
+
+  it('does not start a second create while note entry is open', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+    setNoteEntryValue('First draft');
+
+    clickTarget(hostElement(hostFixture, '[data-testid="host-nested"]'));
+    await hostFixture.whenStable();
+
+    expect(noteEntryInput().value).toBe('First draft');
+    expect(annotationListItems()).toEqual([]);
+  });
+
+  it('clears an open draft when Annotation Mode turns off', async () => {
+    const toggle = annotationModeToggle(hostFixture);
+    toggle.click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+    setNoteEntryValue('In flight');
+
+    toggle.click();
+    await hostFixture.whenStable();
+
+    expect(noteEntry()).toBeNull();
+    expect(annotationListItems()).toEqual([]);
+  });
 });
 
 const annotationModeToggle = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {

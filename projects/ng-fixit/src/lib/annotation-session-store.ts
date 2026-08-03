@@ -1,29 +1,68 @@
 import { computed, Injectable, signal } from '@angular/core';
 
-import { Annotation, AnnotationCreateTarget, AnnotationDraft } from './annotation';
+import { Annotation, AnnotationDraft } from './annotation';
+import { AnnotationMode } from './annotation-mode';
 
 @Injectable()
 export class AnnotationSessionStore {
+  private readonly modeState = signal<AnnotationMode>(AnnotationMode.Off);
   private readonly annotationsState = signal<readonly Annotation[]>([]);
   private readonly draftState = signal<AnnotationDraft | null>(null);
   private nextId = 1;
 
+  readonly mode = computed<AnnotationMode>(() => this.modeState());
   readonly annotations = computed<readonly Annotation[]>(() => this.annotationsState());
   readonly draft = computed<AnnotationDraft | null>(() => this.draftState());
 
-  beginCreate(target: AnnotationCreateTarget): void {
+  enterAnnotationMode(): void {
+    this.modeState.set(AnnotationMode.On);
+  }
+
+  leaveAnnotationMode(): void {
+    this.modeState.set(AnnotationMode.Off);
+    this.draftState.set(null);
+  }
+
+  toggleAnnotationMode(): void {
+    if (this.modeState() === AnnotationMode.On) {
+      this.leaveAnnotationMode();
+      return;
+    }
+
+    this.enterAnnotationMode();
+  }
+
+  beginCreate(locatorSummary: string): void {
+    if (this.draftState() !== null) {
+      return;
+    }
+
     this.draftState.set({
-      locatorSummary: target.locatorSummary,
+      locatorSummary,
+      note: '',
     });
   }
 
-  commitCreate(note: string): void {
+  updateDraftNote(note: string): void {
+    this.draftState.update(draft => {
+      if (!draft) {
+        return draft;
+      }
+
+      return {
+        ...draft,
+        note,
+      };
+    });
+  }
+
+  commitCreate(): void {
     const draft = this.draftState();
     if (!draft) {
       return;
     }
 
-    const trimmedNote = note.trim();
+    const trimmedNote = draft.note.trim();
     if (trimmedNote.length === 0) {
       return;
     }

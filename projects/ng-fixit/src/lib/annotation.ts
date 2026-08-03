@@ -4,10 +4,7 @@ export interface Annotation {
   locatorSummary: string;
 }
 
-export interface AnnotationCreateTarget {
-  locatorSummary: string;
-}
-
 export interface AnnotationDraft {
   locatorSummary: string;
+  note: string;
 }
