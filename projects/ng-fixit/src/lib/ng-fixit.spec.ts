@@ -198,6 +198,115 @@ describe('NgFixit when disabled', () => {
   });
 });
 
+describe('NgFixit create Annotation', () => {
+  let hostFixture: ComponentFixture<HostWithNgFixit>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HostWithNgFixit],
+    }).compileComponents();
+
+    hostFixture = TestBed.createComponent(HostWithNgFixit);
+    await hostFixture.whenStable();
+  });
+
+  it('opens note entry when a Target is clicked in Annotation Mode', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+
+    expect(noteEntry()).not.toBeNull();
+  });
+
+  it('adds a committed Annotation to the working list with a note preview', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+
+    setNoteEntryValue('Fix the button label');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
+      'Fix the button label',
+    ]);
+    expect(noteEntry()).toBeNull();
+  });
+
+  it('creates no Annotation when note entry is canceled', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+
+    setNoteEntryValue('Will abandon this');
+    cancelNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListItems()).toEqual([]);
+    expect(noteEntry()).toBeNull();
+  });
+
+  it('rejects an empty note without creating an Annotation', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+
+    setNoteEntryValue('   ');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListItems()).toEqual([]);
+    expect(noteEntry()).not.toBeNull();
+  });
+
+  it('shows multiple committed Annotations in the working list', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+    setNoteEntryValue('First note');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostElement(hostFixture, '[data-testid="host-nested"]'));
+    await hostFixture.whenStable();
+    setNoteEntryValue('Second note');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
+      'First note',
+      'Second note',
+    ]);
+  });
+
+  it('keeps Annotations in memory only', async () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem');
+
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+    setNoteEntryValue('In-memory only');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(setItem).not.toHaveBeenCalled();
+
+    setItem.mockRestore();
+  });
+});
+
 const annotationModeToggle = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {
   return fixture.nativeElement.querySelector(
     '[data-testid="fixit-annotation-mode-toggle"]',
@@ -254,4 +363,34 @@ const mockElementRect = (
     bottom: box.y + box.height,
     toJSON: () => ({}),
   });
+};
+
+const clickTarget = (element: Element): void => {
+  element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+};
+
+const noteEntry = (): HTMLElement | null => {
+  return document.querySelector('[data-testid="fixit-note-entry"]');
+};
+
+const noteEntryInput = (): HTMLTextAreaElement => {
+  return document.querySelector('[data-testid="fixit-note-entry-input"]') as HTMLTextAreaElement;
+};
+
+const setNoteEntryValue = (note: string): void => {
+  const input = noteEntryInput();
+  input.value = note;
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+};
+
+const commitNoteEntry = (): HTMLButtonElement => {
+  return document.querySelector('[data-testid="fixit-note-entry-commit"]') as HTMLButtonElement;
+};
+
+const cancelNoteEntry = (): HTMLButtonElement => {
+  return document.querySelector('[data-testid="fixit-note-entry-cancel"]') as HTMLButtonElement;
+};
+
+const annotationListItems = (): HTMLElement[] => {
+  return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-item"]'));
 };

@@ -31,7 +31,7 @@ Blank line between tiers.
 
    Within `protected readonly`, order:
    - **Static config** — fixed option arrays and values that do not depend on signals
-   - **Reactive bindings** — `asReadonly()` exports, service state references
+   - **Reactive bindings** — `computed()` exports of private signal state, service state references
    - **Derived values** — `computed(...)` and other derivations
 
    Do **not** place template model re-exports here (see tier 5).
