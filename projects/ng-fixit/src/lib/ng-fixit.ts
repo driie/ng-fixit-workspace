@@ -13,7 +13,9 @@ import {
 import { AnnotationList } from './annotation-list';
 import { AnnotationMode } from './annotation-mode';
 import { AnnotationSessionStore } from './annotation-session-store';
+import { writeClipboardText } from './clipboard';
 import { NoteEntry } from './note-entry';
+import { buildReportMarkdown } from './report-builder';
 import {
   highlightBoxFromElement,
   resolvePointerTarget,
@@ -79,6 +81,15 @@ export class NgFixit {
     if (this.annotationMode() === AnnotationMode.Off) {
       this.hoveredTarget.set(null);
     }
+  }
+
+  copyReport(): void {
+    if (!this.libraryEnabled) {
+      return;
+    }
+
+    const markdown = buildReportMarkdown(this.annotationSessionStore.annotations());
+    writeClipboardText(this.document.defaultView, markdown);
   }
 
   trackPointerTarget(event: PointerEvent): void {
