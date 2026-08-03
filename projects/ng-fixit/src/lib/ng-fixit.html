@@ -1,13 +1,23 @@
 @if (enabled) {
-<div class="fixit-chrome">
+<div class="fixit-chrome" data-fixit-chrome>
   <button
     type="button"
     class="fixit-annotation-mode-toggle"
-    data-fixit-annotation-mode-toggle
+    data-testid="fixit-annotation-mode-toggle"
     [attr.aria-pressed]="annotationModePressed()"
     (click)="toggleAnnotationMode()"
   >
     Annotation Mode
   </button>
 </div>
-}
+@if (targetHighlightBox(); as box) {
+<div
+  class="fixit-target-highlight"
+  data-fixit-chrome
+  data-testid="fixit-target-highlight"
+  [style.top]="box.top"
+  [style.left]="box.left"
+  [style.width]="box.width"
+  [style.height]="box.height"
+></div>
+} }
