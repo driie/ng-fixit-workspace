@@ -34,3 +34,12 @@
   outline: 2px solid #93c5fd;
   outline-offset: 2px;
 }
+
+.fixit-target-highlight {
+  position: fixed;
+  z-index: 2147482990;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 2px solid #2563eb;
+  background: rgb(37 99 235 / 12%);
+}
