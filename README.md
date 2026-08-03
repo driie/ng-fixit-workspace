@@ -29,7 +29,7 @@ GLOSSARY.md             # canonical domain language
 ## Prerequisites
 
 - Node.js (compatible with Angular 22)
-- [pnpm](https://pnpm.io/) 10.x
+- [pnpm](https://pnpm.io/) 11.x
 
 ## Setup
 

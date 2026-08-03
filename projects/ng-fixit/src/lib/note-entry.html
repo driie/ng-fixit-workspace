@@ -1,0 +1,29 @@
+<label class="fixit-note-entry-label" id="fixit-note-entry-label" for="fixit-note-entry-input"
+  >Correction note</label
+>
+<textarea
+  #noteInput
+  id="fixit-note-entry-input"
+  class="fixit-note-entry-input"
+  data-testid="fixit-note-entry-input"
+  [value]="draftNote()"
+  (input)="updateDraftNote($event)"
+></textarea>
+<div class="fixit-note-entry-actions">
+  <button
+    type="button"
+    class="fixit-note-entry-commit"
+    data-testid="fixit-note-entry-commit"
+    (click)="commitAnnotation()"
+  >
+    Commit
+  </button>
+  <button
+    type="button"
+    class="fixit-note-entry-cancel"
+    data-testid="fixit-note-entry-cancel"
+    (click)="cancelAnnotation()"
+  >
+    Cancel
+  </button>
+</div>
