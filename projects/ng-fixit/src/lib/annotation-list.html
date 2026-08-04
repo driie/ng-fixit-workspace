@@ -1,7 +1,12 @@
 <ul class="fixit-annotation-list" data-fixit-chrome data-testid="fixit-annotation-list">
   @for (annotation of annotations(); track annotation.id) {
   <li class="fixit-annotation-list-item" data-testid="fixit-annotation-list-item">
-    {{ annotation.note }}
+    <span class="fixit-annotation-list-note" data-testid="fixit-annotation-list-note"
+      >{{ annotation.note }}</span
+    >
+    <span class="fixit-annotation-list-locator" data-testid="fixit-annotation-list-locator"
+      >{{ annotation.locator.cssPath }}</span
+    >
   </li>
   } @empty {
   <li class="fixit-annotation-list-empty">No Annotations yet</li>

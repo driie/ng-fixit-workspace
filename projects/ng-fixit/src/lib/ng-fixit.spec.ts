@@ -231,9 +231,7 @@ describe('NgFixit create Annotation', () => {
     commitNoteEntry().click();
     await hostFixture.whenStable();
 
-    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
-      'Fix the button label',
-    ]);
+    expect(annotationListNotes()).toEqual(['Fix the button label']);
     expect(noteEntry()).toBeNull();
   });
 
@@ -283,10 +281,7 @@ describe('NgFixit create Annotation', () => {
     commitNoteEntry().click();
     await hostFixture.whenStable();
 
-    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
-      'First note',
-      'Second note',
-    ]);
+    expect(annotationListNotes()).toEqual(['First note', 'Second note']);
   });
 
   it('keeps Annotations in memory only', async () => {
@@ -395,9 +390,7 @@ describe('NgFixit copy Report', () => {
 
     expect(writeText).toHaveBeenCalledTimes(1);
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Keep me after copy'));
-    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
-      'Keep me after copy',
-    ]);
+    expect(annotationListNotes()).toEqual(['Keep me after copy']);
   });
 
   it('copies a multi-Annotation Report without clearing the list', async () => {
@@ -415,10 +408,44 @@ describe('NgFixit copy Report', () => {
     const markdown = writeText.mock.calls[0]?.[0] as string;
     expect(markdown).toContain('First note');
     expect(markdown).toContain('Second note');
-    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
-      'First note',
-      'Second note',
-    ]);
+    expect(annotationListNotes()).toEqual(['First note', 'Second note']);
+  });
+
+  it('copies a Report that includes captured Target context', async () => {
+    const button = hostButton(hostFixture);
+    button.id = 'save-action';
+
+    await createAnnotation(hostFixture, button, 'Fix the save action');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    const markdown = writeText.mock.calls[0]?.[0] as string;
+    expect(markdown).toContain('Fix the save action');
+    expect(markdown).toContain('#save-action');
+  });
+});
+
+describe('NgFixit Locator capture', () => {
+  let hostFixture: ComponentFixture<HostWithNgFixit>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HostWithNgFixit],
+    }).compileComponents();
+
+    hostFixture = TestBed.createComponent(HostWithNgFixit);
+    await hostFixture.whenStable();
+  });
+
+  it('stores a CSS path Locator summary in the Annotation list after create', async () => {
+    const button = hostButton(hostFixture);
+    button.id = 'primary-cta';
+
+    await createAnnotation(hostFixture, button, 'Adjust CTA contrast');
+
+    expect(annotationListNotes()).toEqual(['Adjust CTA contrast']);
+    expect(annotationListLocators()).toEqual(['#primary-cta']);
   });
 });
 
@@ -508,6 +535,18 @@ const cancelNoteEntry = (): HTMLButtonElement => {
 
 const annotationListItems = (): HTMLElement[] => {
   return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-item"]'));
+};
+
+const annotationListNotes = (): string[] => {
+  return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-note"]')).map(
+    item => item.textContent?.trim() ?? '',
+  );
+};
+
+const annotationListLocators = (): string[] => {
+  return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-locator"]')).map(
+    item => item.textContent?.trim() ?? '',
+  );
 };
 
 const copyReportButton = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {

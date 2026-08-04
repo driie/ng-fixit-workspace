@@ -1,5 +1,14 @@
 import { AnnotationMode } from './annotation-mode';
 import { AnnotationSessionStore } from './annotation-session-store';
+import { Locator } from './locator';
+
+const locatorFixture = (overrides: Partial<Locator> = {}): Locator => {
+  return {
+    cssPath: 'button',
+    boundingBox: { top: 0, left: 0, width: 10, height: 10 },
+    ...overrides,
+  };
+};
 
 describe('AnnotationSessionStore', () => {
   let store: AnnotationSessionStore;
@@ -23,21 +32,22 @@ describe('AnnotationSessionStore', () => {
   });
 
   it('adds an Annotation to the list when a non-empty note is committed', () => {
-    store.beginCreate('button');
+    const locator = locatorFixture({ cssPath: 'button.primary' });
+    store.beginCreate(locator);
     store.updateDraftNote('Fix the label contrast');
     store.commitCreate();
 
     expect(store.annotations()).toEqual([
       expect.objectContaining({
         note: 'Fix the label contrast',
-        locatorSummary: 'button',
+        locator,
       }),
     ]);
     expect(store.draft()).toBeNull();
   });
 
   it('rejects an empty note and keeps the draft open', () => {
-    store.beginCreate('button');
+    store.beginCreate(locatorFixture());
     store.updateDraftNote('   ');
     store.commitCreate();
 
@@ -47,7 +57,7 @@ describe('AnnotationSessionStore', () => {
   });
 
   it('abandons create without adding an Annotation when canceled', () => {
-    store.beginCreate('button');
+    store.beginCreate(locatorFixture());
     store.updateDraftNote('Will abandon');
     store.cancelCreate();
 
@@ -56,19 +66,20 @@ describe('AnnotationSessionStore', () => {
   });
 
   it('does not start a second create while a draft is open', () => {
-    store.beginCreate('button');
+    const first = locatorFixture({ cssPath: 'button' });
+    store.beginCreate(first);
     store.updateDraftNote('First draft');
-    store.beginCreate('span');
+    store.beginCreate(locatorFixture({ cssPath: 'span' }));
 
     expect(store.draft()).toEqual({
-      locatorSummary: 'button',
+      locator: first,
       note: 'First draft',
     });
   });
 
   it('clears an open draft when leaving Annotation Mode', () => {
     store.enterAnnotationMode();
-    store.beginCreate('button');
+    store.beginCreate(locatorFixture());
     store.updateDraftNote('In flight');
     store.leaveAnnotationMode();
 
@@ -77,10 +88,10 @@ describe('AnnotationSessionStore', () => {
   });
 
   it('accumulates multiple Annotations in session memory', () => {
-    store.beginCreate('button');
+    store.beginCreate(locatorFixture({ cssPath: 'button' }));
     store.updateDraftNote('First note');
     store.commitCreate();
-    store.beginCreate('span');
+    store.beginCreate(locatorFixture({ cssPath: 'span' }));
     store.updateDraftNote('Second note');
     store.commitCreate();
 

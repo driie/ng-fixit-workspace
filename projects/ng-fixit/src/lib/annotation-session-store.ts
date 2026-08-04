@@ -2,6 +2,7 @@ import { computed, Injectable, signal } from '@angular/core';
 
 import { Annotation, AnnotationDraft } from './annotation';
 import { AnnotationMode } from './annotation-mode';
+import { Locator } from './locator';
 
 @Injectable()
 export class AnnotationSessionStore {
@@ -32,13 +33,13 @@ export class AnnotationSessionStore {
     this.enterAnnotationMode();
   }
 
-  beginCreate(locatorSummary: string): void {
+  beginCreate(locator: Locator): void {
     if (this.draftState() !== null) {
       return;
     }
 
     this.draftState.set({
-      locatorSummary,
+      locator,
       note: '',
     });
   }
@@ -72,7 +73,7 @@ export class AnnotationSessionStore {
       {
         id: String(this.nextId++),
         note: trimmedNote,
-        locatorSummary: draft.locatorSummary,
+        locator: draft.locator,
       },
     ]);
     this.draftState.set(null);
