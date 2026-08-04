@@ -1,16 +1,4 @@
-export interface BoundingBox {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
-
-export interface Locator {
-  cssPath: string;
-  boundingBox: BoundingBox;
-  nearbyText?: string;
-  pageUrl?: string;
-}
+import { Locator } from '../models/locator';
 
 const NEARBY_TEXT_MAX_LENGTH = 120;
 

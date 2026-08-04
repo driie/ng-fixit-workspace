@@ -1,7 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 
-import { Annotation, AnnotationDraft, AnnotationTargetContext } from './annotation';
-import { AnnotationMode } from './annotation-mode';
+import { Annotation, AnnotationDraft, AnnotationTargetContext } from '../models/annotation';
+import { AnnotationMode } from '../models/annotation-mode';
 
 @Injectable()
 export class AnnotationSessionStore {

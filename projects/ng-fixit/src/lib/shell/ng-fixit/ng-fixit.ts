@@ -10,19 +10,19 @@ import {
   signal,
 } from '@angular/core';
 
-import { AnnotationList } from './annotation-list';
-import { AnnotationMode } from './annotation-mode';
-import { AnnotationSessionStore } from './annotation-session-store';
-import { writeClipboardText } from './clipboard';
-import { discoverHostComponent } from './host-component';
-import { captureLocator } from './locator';
-import { NoteEntry } from './note-entry';
-import { buildReportMarkdown } from './report-builder';
+import { AnnotationList } from '../../components/annotation-list/annotation-list';
+import { NoteEntry } from '../../components/note-entry/note-entry';
+import { AnnotationMode } from '../../models/annotation-mode';
+import { AnnotationSessionStore } from '../../services/annotation-session-store';
+import { writeClipboardText } from '../../utils/clipboard';
+import { discoverHostComponent } from '../../utils/host-component';
+import { captureLocator } from '../../utils/locator';
+import { buildReportMarkdown } from '../../utils/report-builder';
 import {
   highlightBoxFromElement,
   resolvePointerTarget,
   TargetHighlightBox,
-} from './target-highlight';
+} from '../../utils/target-highlight';
 
 export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', {
   providedIn: 'root',
