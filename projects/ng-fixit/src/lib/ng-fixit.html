@@ -2,12 +2,20 @@
 <div class="fixit-chrome" data-fixit-chrome>
   <button
     type="button"
-    class="fixit-annotation-mode-toggle"
+    class="fixit-chrome-button"
     data-testid="fixit-annotation-mode-toggle"
     [attr.aria-pressed]="annotationModePressed()"
     (click)="toggleAnnotationMode()"
   >
     Annotation Mode
+  </button>
+  <button
+    type="button"
+    class="fixit-chrome-button"
+    data-testid="fixit-copy-report"
+    (click)="copyReport()"
+  >
+    Copy Report
   </button>
 </div>
 @if (targetHighlightBox(); as box) {

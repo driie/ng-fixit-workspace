@@ -27,7 +27,7 @@
   pointer-events: auto;
 }
 
-.fixit-annotation-mode-toggle {
+.fixit-chrome-button {
   margin: 0;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--fixit-color-border);
@@ -40,12 +40,12 @@
   cursor: pointer;
 }
 
-.fixit-annotation-mode-toggle[aria-pressed='true'] {
+.fixit-chrome-button[aria-pressed='true'] {
   background: var(--fixit-color-accent);
   border-color: var(--fixit-color-accent-strong);
 }
 
-.fixit-annotation-mode-toggle:focus-visible {
+.fixit-chrome-button:focus-visible {
   outline: 2px solid var(--fixit-color-focus);
   outline-offset: 2px;
 }

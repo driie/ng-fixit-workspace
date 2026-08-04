@@ -353,6 +353,75 @@ describe('NgFixit create Annotation', () => {
   });
 });
 
+describe('NgFixit copy Report', () => {
+  let hostFixture: ComponentFixture<HostWithNgFixit>;
+  let writeText: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [HostWithNgFixit],
+    }).compileComponents();
+
+    hostFixture = TestBed.createComponent(HostWithNgFixit);
+    await hostFixture.whenStable();
+  });
+
+  it('shows a Copy Report control when the library is enabled', () => {
+    expect(copyReportButton(hostFixture)).toBeTruthy();
+  });
+
+  it('copies Report Markdown for the current Annotations to the clipboard', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Fix the button label'));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('# ng-fixit Report'));
+  });
+
+  it('leaves the working Annotation list intact after a successful copy', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Keep me after copy');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Keep me after copy'));
+    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
+      'Keep me after copy',
+    ]);
+  });
+
+  it('copies a multi-Annotation Report without clearing the list', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
+    await createAnnotation(
+      hostFixture,
+      hostElement(hostFixture, '[data-testid="host-nested"]'),
+      'Second note',
+    );
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    const markdown = writeText.mock.calls[0]?.[0] as string;
+    expect(markdown).toContain('First note');
+    expect(markdown).toContain('Second note');
+    expect(annotationListItems().map(item => item.textContent?.trim())).toEqual([
+      'First note',
+      'Second note',
+    ]);
+  });
+});
+
 const annotationModeToggle = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {
   return fixture.nativeElement.querySelector(
     '[data-testid="fixit-annotation-mode-toggle"]',
@@ -439,4 +508,29 @@ const cancelNoteEntry = (): HTMLButtonElement => {
 
 const annotationListItems = (): HTMLElement[] => {
   return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-item"]'));
+};
+
+const copyReportButton = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {
+  return fixture.nativeElement.querySelector(
+    '[data-testid="fixit-copy-report"]',
+  ) as HTMLButtonElement;
+};
+
+const createAnnotation = async (
+  fixture: ComponentFixture<HostWithNgFixit>,
+  target: Element,
+  note: string,
+): Promise<void> => {
+  const toggle = annotationModeToggle(fixture);
+  if (toggle.getAttribute('aria-pressed') !== 'true') {
+    toggle.click();
+    await fixture.whenStable();
+  }
+
+  clickTarget(target);
+  await fixture.whenStable();
+
+  setNoteEntryValue(note);
+  commitNoteEntry().click();
+  await fixture.whenStable();
 };
