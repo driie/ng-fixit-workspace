@@ -1,10 +1,12 @@
+import { Locator } from './locator';
+
 export interface Annotation {
   id: string;
   note: string;
-  locatorSummary: string;
+  locator: Locator;
 }
 
 export interface AnnotationDraft {
-  locatorSummary: string;
+  locator: Locator;
   note: string;
 }

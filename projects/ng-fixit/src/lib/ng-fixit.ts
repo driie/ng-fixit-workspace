@@ -14,6 +14,7 @@ import { AnnotationList } from './annotation-list';
 import { AnnotationMode } from './annotation-mode';
 import { AnnotationSessionStore } from './annotation-session-store';
 import { writeClipboardText } from './clipboard';
+import { captureLocator } from './locator';
 import { NoteEntry } from './note-entry';
 import { buildReportMarkdown } from './report-builder';
 import {
@@ -122,7 +123,7 @@ export class NgFixit {
     event.preventDefault();
     event.stopPropagation();
 
-    this.annotationSessionStore.beginCreate(target.tagName.toLowerCase());
+    this.annotationSessionStore.beginCreate(captureLocator(target));
   }
 
   refreshTargetHighlight(): void {
