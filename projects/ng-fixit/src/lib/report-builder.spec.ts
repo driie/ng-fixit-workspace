@@ -1,4 +1,5 @@
 import { Annotation } from './annotation';
+import { HostComponentInfo } from './host-component';
 import { Locator } from './locator';
 import { buildReportMarkdown } from './report-builder';
 
@@ -6,6 +7,14 @@ const locatorFixture = (overrides: Partial<Locator> = {}): Locator => {
   return {
     cssPath: 'button',
     boundingBox: { top: 0, left: 0, width: 10, height: 10 },
+    ...overrides,
+  };
+};
+
+const hostComponentFixture = (overrides: Partial<HostComponentInfo> = {}): HostComponentInfo => {
+  return {
+    name: 'KnownHost',
+    selector: 'fixit-known-host',
     ...overrides,
   };
 };
@@ -136,5 +145,55 @@ describe('buildReportMarkdown', () => {
         '',
       ].join('\n'),
     );
+  });
+
+  it('includes Host Component selector and name when present', () => {
+    const annotations: readonly Annotation[] = [
+      annotationFixture({
+        id: '1',
+        note: 'Fix the host button',
+        hostComponent: hostComponentFixture({
+          name: 'KnownHost',
+          selector: 'fixit-known-host',
+        }),
+      }),
+    ];
+
+    const markdown = buildReportMarkdown(annotations);
+
+    expect(markdown).toContain('- Host Component: `fixit-known-host` (KnownHost)');
+  });
+
+  it('includes Host Component name only when selector is absent', () => {
+    const annotations: readonly Annotation[] = [
+      annotationFixture({
+        id: '1',
+        note: 'Name only host',
+        hostComponent: hostComponentFixture({
+          name: 'KnownHost',
+          selector: undefined,
+        }),
+      }),
+    ];
+
+    const markdown = buildReportMarkdown(annotations);
+
+    expect(markdown).toContain('- Host Component: KnownHost');
+    expect(markdown).not.toContain('`undefined`');
+  });
+
+  it('omits Host Component when absent without breaking the Report', () => {
+    const annotations: readonly Annotation[] = [
+      annotationFixture({
+        id: '1',
+        note: 'No host metadata',
+      }),
+    ];
+
+    const markdown = buildReportMarkdown(annotations);
+
+    expect(markdown).not.toContain('Host Component');
+    expect(markdown).toContain('No host metadata');
+    expect(markdown).toContain('- CSS path:');
   });
 });

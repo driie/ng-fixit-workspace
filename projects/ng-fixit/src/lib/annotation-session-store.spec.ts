@@ -1,11 +1,20 @@
 import { AnnotationMode } from './annotation-mode';
 import { AnnotationSessionStore } from './annotation-session-store';
+import { HostComponentInfo } from './host-component';
 import { Locator } from './locator';
 
 const locatorFixture = (overrides: Partial<Locator> = {}): Locator => {
   return {
     cssPath: 'button',
     boundingBox: { top: 0, left: 0, width: 10, height: 10 },
+    ...overrides,
+  };
+};
+
+const hostComponentFixture = (overrides: Partial<HostComponentInfo> = {}): HostComponentInfo => {
+  return {
+    name: 'KnownHost',
+    selector: 'fixit-known-host',
     ...overrides,
   };
 };
@@ -33,7 +42,7 @@ describe('AnnotationSessionStore', () => {
 
   it('adds an Annotation to the list when a non-empty note is committed', () => {
     const locator = locatorFixture({ cssPath: 'button.primary' });
-    store.beginCreate(locator);
+    store.beginCreate({ locator });
     store.updateDraftNote('Fix the label contrast');
     store.commitCreate();
 
@@ -46,8 +55,32 @@ describe('AnnotationSessionStore', () => {
     expect(store.draft()).toBeNull();
   });
 
+  it('stores Host Component metadata on the Annotation when provided', () => {
+    const locator = locatorFixture({ cssPath: 'button.primary' });
+    const hostComponent = hostComponentFixture();
+    store.beginCreate({ locator, hostComponent });
+    store.updateDraftNote('Fix the host CTA');
+    store.commitCreate();
+
+    expect(store.annotations()).toEqual([
+      expect.objectContaining({
+        note: 'Fix the host CTA',
+        locator,
+        hostComponent,
+      }),
+    ]);
+  });
+
+  it('omits Host Component on the Annotation when not provided', () => {
+    store.beginCreate({ locator: locatorFixture() });
+    store.updateDraftNote('Pure DOM target');
+    store.commitCreate();
+
+    expect(store.annotations()[0]?.hostComponent).toBeUndefined();
+  });
+
   it('rejects an empty note and keeps the draft open', () => {
-    store.beginCreate(locatorFixture());
+    store.beginCreate({ locator: locatorFixture() });
     store.updateDraftNote('   ');
     store.commitCreate();
 
@@ -57,7 +90,7 @@ describe('AnnotationSessionStore', () => {
   });
 
   it('abandons create without adding an Annotation when canceled', () => {
-    store.beginCreate(locatorFixture());
+    store.beginCreate({ locator: locatorFixture() });
     store.updateDraftNote('Will abandon');
     store.cancelCreate();
 
@@ -67,9 +100,9 @@ describe('AnnotationSessionStore', () => {
 
   it('does not start a second create while a draft is open', () => {
     const first = locatorFixture({ cssPath: 'button' });
-    store.beginCreate(first);
+    store.beginCreate({ locator: first });
     store.updateDraftNote('First draft');
-    store.beginCreate(locatorFixture({ cssPath: 'span' }));
+    store.beginCreate({ locator: locatorFixture({ cssPath: 'span' }) });
 
     expect(store.draft()).toEqual({
       locator: first,
@@ -79,7 +112,7 @@ describe('AnnotationSessionStore', () => {
 
   it('clears an open draft when leaving Annotation Mode', () => {
     store.enterAnnotationMode();
-    store.beginCreate(locatorFixture());
+    store.beginCreate({ locator: locatorFixture() });
     store.updateDraftNote('In flight');
     store.leaveAnnotationMode();
 
@@ -88,10 +121,10 @@ describe('AnnotationSessionStore', () => {
   });
 
   it('accumulates multiple Annotations in session memory', () => {
-    store.beginCreate(locatorFixture({ cssPath: 'button' }));
+    store.beginCreate({ locator: locatorFixture({ cssPath: 'button' }) });
     store.updateDraftNote('First note');
     store.commitCreate();
-    store.beginCreate(locatorFixture({ cssPath: 'span' }));
+    store.beginCreate({ locator: locatorFixture({ cssPath: 'span' }) });
     store.updateDraftNote('Second note');
     store.commitCreate();
 
