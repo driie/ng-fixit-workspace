@@ -449,6 +449,37 @@ describe('NgFixit Locator capture', () => {
   });
 });
 
+describe('NgFixit Host Component capture', () => {
+  let hostFixture: ComponentFixture<HostWithNgFixit>;
+  let writeText: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [HostWithNgFixit],
+    }).compileComponents();
+
+    hostFixture = TestBed.createComponent(HostWithNgFixit);
+    await hostFixture.whenStable();
+  });
+
+  it('includes nearest Host Component metadata in the copied Report', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix host button');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    const markdown = writeText.mock.calls[0]?.[0] as string;
+    expect(markdown).toContain('Fix host button');
+    expect(markdown).toContain('HostWithNgFixit');
+  });
+});
+
 const annotationModeToggle = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {
   return fixture.nativeElement.querySelector(
     '[data-testid="fixit-annotation-mode-toggle"]',

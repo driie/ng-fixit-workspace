@@ -1,8 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 
-import { Annotation, AnnotationDraft } from './annotation';
+import { Annotation, AnnotationDraft, AnnotationTargetContext } from './annotation';
 import { AnnotationMode } from './annotation-mode';
-import { Locator } from './locator';
 
 @Injectable()
 export class AnnotationSessionStore {
@@ -33,13 +32,13 @@ export class AnnotationSessionStore {
     this.enterAnnotationMode();
   }
 
-  beginCreate(locator: Locator): void {
+  beginCreate(targetContext: AnnotationTargetContext): void {
     if (this.draftState() !== null) {
       return;
     }
 
     this.draftState.set({
-      locator,
+      ...targetContext,
       note: '',
     });
   }
@@ -68,12 +67,13 @@ export class AnnotationSessionStore {
       return;
     }
 
+    const { note: _discardedNote, ...targetContext } = draft;
     this.annotationsState.update(annotations => [
       ...annotations,
       {
         id: String(this.nextId++),
         note: trimmedNote,
-        locator: draft.locator,
+        ...targetContext,
       },
     ]);
     this.draftState.set(null);

@@ -13,6 +13,7 @@ export const buildReportMarkdown = (annotations: readonly Annotation[]): string 
       annotation.note,
       '',
       ...formatLocatorLines(annotation.locator),
+      ...formatHostComponentLines(annotation.hostComponent),
     ].join('\n');
   });
 
@@ -34,4 +35,16 @@ const formatLocatorLines = (locator: Locator): string[] => {
   }
 
   return lines;
+};
+
+const formatHostComponentLines = (hostComponent: Annotation['hostComponent']): string[] => {
+  if (!hostComponent) {
+    return [];
+  }
+
+  if (hostComponent.selector) {
+    return [`- Host Component: \`${hostComponent.selector}\` (${hostComponent.name})`];
+  }
+
+  return [`- Host Component: ${hostComponent.name}`];
 };
