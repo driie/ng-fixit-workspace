@@ -14,6 +14,7 @@ Mandatory for any work under the library source tree.
 - **Prefix**: `fixit` (public root selector: `ng-fixit`)
 - **Tests**: Vitest via `pnpm test` / `ng test`
 - **Domain language**: `GLOSSARY.md`
+- **Source layout**: layered under `src/lib/` — `shell/`, `components/<name>/`, `models/`, `services/`, `utils/` (see `project.md`)
 
 ## The Six Hard "Never"s (Strictly Enforced)
 

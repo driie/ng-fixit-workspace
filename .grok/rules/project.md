@@ -23,11 +23,25 @@ Prefer glossary terms in code, UI copy, commits, and docs. Avoid the glossary’
 Angular workspace with one publishable library:
 
 - `projects/ng-fixit/` — library root (`ng-packagr`)
-- `projects/ng-fixit/src/lib/` — library source
+- `projects/ng-fixit/src/lib/` — library source (layered folders, not a flat dump)
 - `projects/ng-fixit/src/styles.css` — sole stylesheet (plain CSS; no per-component CSS)
 - `projects/ng-fixit/src/public-api.ts` — public API surface (only export what consumers may use)
 - `GLOSSARY.md` — shared product language
 - `.grok/` — project rules, skills, MCP config
+
+### `src/lib/` layout
+
+Single product domain (no multi-feature SPA tree). Mirror lepu-sunrise layering under `lib/`:
+
+| Folder        | Holds                                                                  |
+| ------------- | ---------------------------------------------------------------------- |
+| `shell/`      | Public drop-in root (`ng-fixit`) — one component folder                |
+| `components/` | Internal UI; each component in its own folder (`foo/foo.ts` + `.html`) |
+| `models/`     | Domain interfaces and `as const` models                                |
+| `services/`   | Injectable stores/services                                             |
+| `utils/`      | Pure helpers (Locator capture, Report Markdown, clipboard, …)          |
+
+Specs sit beside the unit under test. Do **not** add `pages/` or multi-feature `features/` trees unless the library gains real feature boundaries.
 
 Selector prefix: **`fixit`**. Public drop-in root selector: **`ng-fixit`**.
 

@@ -5,10 +5,7 @@ import {
   ɵgetClosestComponentName as getClosestComponentName,
 } from '@angular/core';
 
-export interface HostComponentInfo {
-  name: string;
-  selector?: string;
-}
+import { HostComponentInfo } from '../models/host-component';
 
 export const discoverHostComponent = (element: Element): HostComponentInfo | undefined => {
   const name = getClosestComponentName(element) ?? undefined;

@@ -60,9 +60,10 @@ Blank line between tiers.
 
 ## Types
 
-- **`interface`** — object shapes (models, DTOs)
+- **`interface`** — object shapes (models, DTOs) live under `lib/models/`
 - **`type`** — unions, aliases, mapped types
 - **Do not use TypeScript `enum`** — use the finite string union pattern below instead
+- Pure functions that build or format models live under `lib/utils/` (import types from `models/`, do not define domain interfaces in utils)
 
 ### Signal typing
 

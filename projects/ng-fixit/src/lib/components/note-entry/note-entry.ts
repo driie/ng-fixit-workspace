@@ -8,7 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 
-import { AnnotationSessionStore } from './annotation-session-store';
+import { AnnotationSessionStore } from '../../services/annotation-session-store';
 
 @Component({
   selector: 'fixit-note-entry',

@@ -1,6 +1,6 @@
-import { Annotation } from './annotation';
-import { HostComponentInfo } from './host-component';
-import { Locator } from './locator';
+import { Annotation } from '../models/annotation';
+import { HostComponentInfo } from '../models/host-component';
+import { Locator } from '../models/locator';
 import { buildReportMarkdown } from './report-builder';
 
 const locatorFixture = (overrides: Partial<Locator> = {}): Locator => {

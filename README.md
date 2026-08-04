@@ -20,10 +20,17 @@ Early workspace. Domain language and v1 product shape are defined; library imple
 ## Workspace layout
 
 ```text
-projects/ng-fixit/     # publishable library
-  src/lib/              # library source
-  src/public-api.ts     # public API surface
-GLOSSARY.md             # canonical domain language
+projects/ng-fixit/                 # publishable library
+  src/
+    lib/
+      shell/ng-fixit/              # public drop-in root
+      components/                   # internal UI (one folder per component)
+      models/                       # domain types and as-const models
+      services/                     # session/store services
+      utils/                        # pure helpers (locator, report, clipboard, …)
+    public-api.ts                   # public API surface
+    styles.css                      # sole stylesheet
+GLOSSARY.md                         # canonical domain language
 ```
 
 ## Prerequisites

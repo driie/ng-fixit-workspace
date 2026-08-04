@@ -80,12 +80,20 @@ Use `@if` for true conditionals (flags, optional models, mutually exclusive layo
 From workspace root, target the library project:
 
 ```bash
-pnpm ng generate component annotation-list --project=ng-fixit
-pnpm ng generate service annotation-store --project=ng-fixit
-pnpm ng generate pipe locator-label --project=ng-fixit
+pnpm ng generate component components/annotation-list --project=ng-fixit
+pnpm ng generate service services/annotation-session-store --project=ng-fixit
+pnpm ng generate pipe pipes/locator-label --project=ng-fixit
 ```
 
-After generation, verify: external template, **no** `styleUrl` / generated `.css`, `ChangeDetectionStrategy.OnPush`, `fixit-` selector (except public root `ng-fixit`), no NgModule. Delete any CLI-generated component stylesheet and keep styles in `src/styles.css`. Adjust generated paths into a clear folder layout under `src/lib/` as the library grows.
+After generation, verify: external template, **no** `styleUrl` / generated `.css`, `ChangeDetectionStrategy.OnPush`, `fixit-` selector (except public root `ng-fixit`), no NgModule. Delete any CLI-generated component stylesheet and keep styles in `src/styles.css`. Place artifacts under the layered `src/lib/` layout:
+
+| Kind        | Path                                       |
+| ----------- | ------------------------------------------ |
+| Shell root  | `lib/shell/ng-fixit/`                      |
+| Component   | `lib/components/<name>/` (`.ts` + `.html`) |
+| Model       | `lib/models/`                              |
+| Service     | `lib/services/`                            |
+| Pure helper | `lib/utils/`                               |
 
 ## Standalone-only — no NgModules
 
@@ -124,8 +132,8 @@ Do not rename these concepts to comment/pin/issue/payload/etc.
 
 ## Public API surface
 
-1. Implement under `projects/ng-fixit/src/lib/`.
-2. Export only intentional symbols from `projects/ng-fixit/src/public-api.ts`.
+1. Implement under the layered tree in `projects/ng-fixit/src/lib/` (`shell/`, `components/`, `models/`, `services/`, `utils/`).
+2. Export only intentional symbols from `projects/ng-fixit/src/public-api.ts` (re-export from the real paths, e.g. `./lib/shell/ng-fixit/ng-fixit`).
 3. Prefer exporting: root shell component, public config tokens, and stable types needed by hosts.
 4. Keep report builders, DOM locators, and internal panels unexported until they are part of the contract.
 

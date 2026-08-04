@@ -1,5 +1,5 @@
-import { Annotation } from './annotation';
-import { Locator } from './locator';
+import { Annotation } from '../models/annotation';
+import { Locator } from '../models/locator';
 
 export const buildReportMarkdown = (annotations: readonly Annotation[]): string => {
   if (annotations.length === 0) {

@@ -1,7 +1,7 @@
-import { AnnotationMode } from './annotation-mode';
+import { AnnotationMode } from '../models/annotation-mode';
+import { HostComponentInfo } from '../models/host-component';
+import { Locator } from '../models/locator';
 import { AnnotationSessionStore } from './annotation-session-store';
-import { HostComponentInfo } from './host-component';
-import { Locator } from './locator';
 
 const locatorFixture = (overrides: Partial<Locator> = {}): Locator => {
   return {
