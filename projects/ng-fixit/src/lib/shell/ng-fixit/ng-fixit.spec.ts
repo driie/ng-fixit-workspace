@@ -449,6 +449,131 @@ describe('NgFixit Locator capture', () => {
   });
 });
 
+describe('NgFixit Annotation list management', () => {
+  let hostFixture: ComponentFixture<HostWithNgFixit>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HostWithNgFixit],
+    }).compileComponents();
+
+    hostFixture = TestBed.createComponent(HostWithNgFixit);
+    await hostFixture.whenStable();
+  });
+
+  it('removes only the deleted Annotation from the working list', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
+    await createAnnotation(
+      hostFixture,
+      hostElement(hostFixture, '[data-testid="host-nested"]'),
+      'Second note',
+    );
+
+    deleteAnnotationButtons()[0]?.click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual(['Second note']);
+  });
+
+  it('clears all Annotations from the working list', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
+    await createAnnotation(
+      hostFixture,
+      hostElement(hostFixture, '[data-testid="host-nested"]'),
+      'Second note',
+    );
+
+    const clearButton = clearAnnotationsButton();
+    expect(clearButton?.closest('ul')).toBeNull();
+
+    clearButton?.click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual([]);
+  });
+
+  it('updates an Annotation note preview after edit is committed', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
+
+    expect(editAnnotationButtons()[0]?.getAttribute('aria-label')).toBe('Edit note: Original note');
+    expect(deleteAnnotationButtons()[0]?.getAttribute('aria-label')).toBe(
+      'Delete annotation: Original note',
+    );
+
+    editAnnotationButtons()[0]?.click();
+    await hostFixture.whenStable();
+
+    expect(noteEntry()).not.toBeNull();
+    expect(noteEntryInput().value).toBe('Original note');
+
+    setNoteEntryValue('Refined note');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual(['Refined note']);
+    expect(noteEntry()).toBeNull();
+  });
+
+  it('keeps the original note when edit is canceled', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
+
+    editAnnotationButtons()[0]?.click();
+    await hostFixture.whenStable();
+    setNoteEntryValue('Will abandon');
+    cancelNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual(['Original note']);
+    expect(noteEntry()).toBeNull();
+  });
+
+  it('rejects an empty edit without changing the Annotation', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
+
+    editAnnotationButtons()[0]?.click();
+    await hostFixture.whenStable();
+    setNoteEntryValue('   ');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual(['Original note']);
+    expect(noteEntry()).not.toBeNull();
+  });
+
+  it('copies a Report after edit and delete without clearing remaining Annotations', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
+    await createAnnotation(
+      hostFixture,
+      hostElement(hostFixture, '[data-testid="host-nested"]'),
+      'Second note',
+    );
+
+    editAnnotationButtons()[0]?.click();
+    await hostFixture.whenStable();
+    setNoteEntryValue('Refined first note');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    deleteAnnotationButtons()[1]?.click();
+    await hostFixture.whenStable();
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    const markdown = writeText.mock.calls[0]?.[0] as string;
+    expect(markdown).toContain('Refined first note');
+    expect(markdown).not.toContain('Second note');
+    expect(annotationListNotes()).toEqual(['Refined first note']);
+  });
+});
+
 describe('NgFixit Host Component capture', () => {
   let hostFixture: ComponentFixture<HostWithNgFixit>;
   let writeText: ReturnType<typeof vi.fn>;
@@ -578,6 +703,18 @@ const annotationListLocators = (): string[] => {
   return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-locator"]')).map(
     item => item.textContent?.trim() ?? '',
   );
+};
+
+const editAnnotationButtons = (): HTMLButtonElement[] => {
+  return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-edit"]'));
+};
+
+const deleteAnnotationButtons = (): HTMLButtonElement[] => {
+  return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-delete"]'));
+};
+
+const clearAnnotationsButton = (): HTMLButtonElement | null => {
+  return document.querySelector('[data-testid="fixit-annotation-list-clear"]');
 };
 
 const copyReportButton = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {

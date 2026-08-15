@@ -49,10 +49,10 @@ export class NoteEntry {
   }
 
   commitAnnotation(): void {
-    this.annotationSessionStore.commitCreate();
+    this.annotationSessionStore.commitDraft();
   }
 
   cancelAnnotation(): void {
-    this.annotationSessionStore.cancelCreate();
+    this.annotationSessionStore.cancelDraft();
   }
 }
