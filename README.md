@@ -8,7 +8,7 @@ Domain terms live in [`GLOSSARY.md`](./GLOSSARY.md).
 
 ## Status
 
-Early workspace. Domain language and v1 product shape are defined; library implementation is in progress.
+v1 library path is in place. Use the workspace demo to dogfood the drop-in root.
 
 |         |                                                       |
 | ------- | ----------------------------------------------------- |
@@ -30,6 +30,7 @@ projects/ng-fixit/                 # publishable library
       utils/                        # pure helpers (locator, report, clipboard, …)
     public-api.ts                   # public API surface
     styles.css                      # sole stylesheet
+projects/ng-fixit-demo/            # development-only host for dogfooding
 GLOSSARY.md                         # canonical domain language
 ```
 
@@ -58,13 +59,27 @@ Watch mode:
 pnpm watch
 ```
 
+## Demo
+
+The demo app mounts `<ng-fixit />` against sample UI (including a nested Host Component). It consumes the built library from `dist/ng-fixit/`.
+
+```bash
+pnpm build          # required once, or after library changes
+pnpm start          # ng serve ng-fixit-demo
+```
+
+For library edits, run `pnpm watch` in a second terminal.
+
+This workspace demo is for development dogfooding, not a production host.
+
 ## Test
 
 ```bash
-pnpm test           # Vitest via Angular unit-test builder
+pnpm test           # library (Vitest via Angular unit-test builder)
+pnpm test:demo      # demo host integration
 ```
 
-## v1 shape (planned)
+## v1 shape
 
 - **Drop-in UI** — shell-mounted root component owns overlay chrome, Annotation Mode toggle, Annotation list, and copy Report
 - **Annotation Mode** — explicit toggle; when off, the host app receives normal clicks
