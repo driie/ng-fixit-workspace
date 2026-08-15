@@ -1,14 +1,46 @@
-<ul class="fixit-annotation-list" data-fixit-chrome data-testid="fixit-annotation-list">
-  @for (annotation of annotations(); track annotation.id) {
-  <li class="fixit-annotation-list-item" data-testid="fixit-annotation-list-item">
-    <span class="fixit-annotation-list-note" data-testid="fixit-annotation-list-note"
-      >{{ annotation.note }}</span
-    >
-    <span class="fixit-annotation-list-locator" data-testid="fixit-annotation-list-locator"
-      >{{ annotation.locator.cssPath }}</span
-    >
-  </li>
-  } @empty {
-  <li class="fixit-annotation-list-empty">No Annotations yet</li>
+<div class="fixit-annotation-list" data-fixit-chrome data-testid="fixit-annotation-list">
+  <ul class="fixit-annotation-list-items">
+    @for (annotation of annotations(); track annotation.id) {
+    <li class="fixit-annotation-list-item" data-testid="fixit-annotation-list-item">
+      <span class="fixit-annotation-list-note" data-testid="fixit-annotation-list-note"
+        >{{ annotation.note }}</span
+      >
+      <span class="fixit-annotation-list-locator" data-testid="fixit-annotation-list-locator"
+        >{{ annotation.locator.cssPath }}</span
+      >
+      <div class="fixit-annotation-list-item-actions">
+        <button
+          type="button"
+          class="fixit-annotation-list-edit"
+          data-testid="fixit-annotation-list-edit"
+          [attr.aria-label]="'Edit note: ' + annotation.note"
+          (click)="beginEdit(annotation.id)"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          class="fixit-annotation-list-delete"
+          data-testid="fixit-annotation-list-delete"
+          [attr.aria-label]="'Delete annotation: ' + annotation.note"
+          (click)="deleteAnnotation(annotation.id)"
+        >
+          Delete
+        </button>
+      </div>
+    </li>
+    } @empty {
+    <li class="fixit-annotation-list-empty">No Annotations yet</li>
+    }
+  </ul>
+  @if (hasAnnotations()) {
+  <button
+    type="button"
+    class="fixit-annotation-list-clear"
+    data-testid="fixit-annotation-list-clear"
+    (click)="clearAnnotations()"
+  >
+    Clear all
+  </button>
   }
-</ul>
+</div>
