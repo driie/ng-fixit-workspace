@@ -1,0 +1,65 @@
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #f3f4f6;
+  color: #111827;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  line-height: 1.5;
+}
+
+.demo-page {
+  box-sizing: border-box;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 6rem;
+}
+
+.demo-page h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.demo-page > p {
+  margin: 0 0 1.5rem;
+  color: #4b5563;
+}
+
+.demo-invoice-card {
+  box-sizing: border-box;
+  padding: 1.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.demo-invoice-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+}
+
+.demo-invoice-card p {
+  margin: 0 0 0.5rem;
+}
+
+.demo-invoice-card button {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid #1d4ed8;
+  border-radius: 0.5rem;
+  background: #2563eb;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.demo-invoice-card button:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
