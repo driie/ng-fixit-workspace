@@ -8,6 +8,7 @@
   data-testid="fixit-note-entry-input"
   [value]="draftNote()"
   (input)="updateDraftNote($event)"
+  (keydown)="commitIfEnter($event)"
 ></textarea>
 <div class="fixit-note-entry-actions">
   <button

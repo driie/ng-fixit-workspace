@@ -82,7 +82,7 @@ pnpm test:demo      # demo host integration
 ## v1 shape
 
 - **Drop-in UI** — shell-mounted root component owns overlay chrome, Annotation Mode toggle, Annotation list, and copy Report
-- **Annotation Mode** — explicit toggle; when off, the host app receives normal clicks
+- **Annotation Mode** — explicit toggle; when off, the host app receives normal clicks; when on, Target clicks do not run host UI
 - **Target** — single DOM element (hover highlight + click)
 - **Annotation** — Target + required correction note; full CRUD in the list (no reorder)
 - **Report** — structured Markdown (Locator, note, light context including Host Component when discoverable); copy does not clear working Annotations

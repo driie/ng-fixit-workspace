@@ -1,3 +1,5 @@
+import { BoundingBox } from '../models/locator';
+
 export interface TargetHighlightBox {
   top: string;
   left: string;
@@ -13,15 +15,17 @@ export const resolvePointerTarget = (eventTarget: EventTarget | null): Element |
   return eventTarget;
 };
 
-export const highlightBoxFromElement = (target: Element): TargetHighlightBox => {
-  const rect = target.getBoundingClientRect();
-
+export const highlightBoxFromBoundingBox = (box: BoundingBox): TargetHighlightBox => {
   return {
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
+    top: `${box.top}px`,
+    left: `${box.left}px`,
+    width: `${box.width}px`,
+    height: `${box.height}px`,
   };
+};
+
+export const highlightBoxFromElement = (target: Element): TargetHighlightBox => {
+  return highlightBoxFromBoundingBox(target.getBoundingClientRect());
 };
 
 const isLibraryChrome = (element: Element): boolean => {

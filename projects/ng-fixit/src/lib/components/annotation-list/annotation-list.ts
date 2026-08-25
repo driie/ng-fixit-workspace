@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { AnnotationSessionStore } from '../../services/annotation-session-store';
 
@@ -7,14 +7,15 @@ import { AnnotationSessionStore } from '../../services/annotation-session-store'
   templateUrl: './annotation-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    style: 'display: contents',
+    class: 'fixit-annotation-list',
+    'data-fixit-chrome': '',
+    'data-testid': 'fixit-annotation-list',
   },
 })
 export class AnnotationList {
   private readonly annotationSessionStore = inject(AnnotationSessionStore);
 
   protected readonly annotations = this.annotationSessionStore.annotations;
-  protected readonly hasAnnotations = computed<boolean>(() => this.annotations().length > 0);
 
   beginEdit(id: string): void {
     this.annotationSessionStore.beginEdit(id);
