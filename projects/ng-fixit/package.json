@@ -1,6 +1,20 @@
 {
   "name": "ng-fixit",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Development-only Angular library that turns UI selections and correction notes into paste-ready Markdown for AI coding agents.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrPaYu/ng-fixit-workspace.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MrPaYu/ng-fixit-workspace/issues"
+  },
+  "homepage": "https://github.com/MrPaYu/ng-fixit-workspace#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "peerDependencies": {
     "@angular/common": "^22.1.0",
     "@angular/core": "^22.1.0"

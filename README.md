@@ -1,100 +1,126 @@
 # ng-fixit
 
-Development-only Angular library that turns visual UI selections and correction notes into paste-ready Markdown for AI coding agents.
+Development-only Angular library. You pick UI on a running app, write a correction note, and copy a Markdown **Report** to paste into an AI coding agent.
 
-Mount a drop-in root component, enter **Annotation Mode**, select a **Target**, add a required correction note, then copy a **Report** into your agent.
+Mount `<ng-fixit />` once. Enter **Annotation Mode**, click a **Target**, type a note, copy the **Report**.
 
 Domain terms live in [`GLOSSARY.md`](./GLOSSARY.md).
 
-## Status
+|         |                                                             |
+| ------- | ----------------------------------------------------------- |
+| Package | `ng-fixit` on [npm](https://www.npmjs.com/package/ng-fixit) |
+| Stack   | Angular 22                                                  |
+| Prefix  | `fixit` (public root selector: `ng-fixit`)                  |
+| Runtime | Development only (`isDevMode()` unless you override it)     |
 
-v1 library path is in place. Use the workspace demo to dogfood the drop-in root.
+## Use it in a host app
 
-|         |                                                       |
-| ------- | ----------------------------------------------------- |
-| Package | `ng-fixit`                                            |
-| Stack   | Angular 22, TypeScript ~6, Vitest, pnpm               |
-| Prefix  | `fixit` (public root selector: `ng-fixit`)            |
-| Runtime | Development only (`isDevMode` / equivalent host gate) |
+Needs Angular 22 (`@angular/core` and `@angular/common` `^22.1.0`).
 
-## Workspace layout
+```bash
+pnpm add ng-fixit
+```
+
+Add the library stylesheet to the host `angular.json` `styles` array. A TypeScript `import 'ng-fixit/styles.css'` can fail typecheck (`TS2882`) and may not inject CSS with the application builder.
+
+```json
+"styles": ["src/styles.css", "node_modules/ng-fixit/styles.css"]
+```
+
+Import `NgFixit` on the application shell and mount it once:
+
+```ts
+import { NgFixit } from 'ng-fixit';
+
+@Component({
+  imports: [NgFixit],
+  templateUrl: './app.html',
+})
+export class App {}
+```
+
+```html
+<ng-fixit />
+```
+
+The drop-in root stays inert unless `NG_FIXIT_ENABLED` is true. That token defaults to Angular `isDevMode()`, so production builds do not turn on Annotation Mode. You can force it:
+
+```ts
+import { NG_FIXIT_ENABLED } from 'ng-fixit';
+
+{ provide: NG_FIXIT_ENABLED, useValue: false }
+```
+
+### Using Annotation Mode
+
+1. Run the app with `ng serve` (or your usual dev server).
+2. The Annotation Mode button sits at the bottom right. Click it. Escape turns it off.
+3. Hover host UI. A highlight marks a selectable Target. Library chrome is not selectable.
+4. Click a Target, type a required note, press Enter to save the Annotation.
+5. Edit, delete, or clear notes in the list.
+6. Click **Copy Report** and paste the Markdown into your agent. Copy does not clear the list.
+
+Annotations live in memory for the current tab. A reload clears them.
+
+Public API: `NgFixit`, `NG_FIXIT_ENABLED`, `AnnotationMode`, `ANNOTATION_MODES`.
+
+## Publish a new version
+
+CI publishes `dist/ng-fixit` to npm when you merge to `main` **and** `projects/ng-fixit/package.json` has a version that is not already on npm. Same version, no publish.
+
+1. Bump `version` in `projects/ng-fixit/package.json` (semver).
+2. Merge to `main`.
+3. The **Publish** workflow tests, builds, then runs `.github/scripts/publish-if-new.sh`.
+
+### One-time npm trusted publisher
+
+Do this before the first publish (and before merging `0.1.0` to `main`):
+
+1. Create an [npmjs.com](https://www.npmjs.com) account and enable 2FA.
+2. Add a GitHub Actions **pending** trusted publisher for a new package named `ng-fixit`.
+3. GitHub user: `MrPaYu`. Repository: `ng-fixit-workspace`. Workflow filename: `publish.yml`.
+
+Docs: [Trusted publishing for npm](https://docs.npmjs.com/trusted-publishers/). The workflow uses OIDC (`id-token: write`). There is no `NPM_TOKEN` secret.
+
+## Develop this repo
+
+pnpm 11.x and a Node version that Angular 22 accepts.
+
+```bash
+pnpm install
+pnpm build          # output: dist/ng-fixit/
+pnpm start          # demo host at http://localhost:4200/
+pnpm test           # library
+pnpm test:demo      # demo
+```
+
+The demo consumes `dist/ng-fixit/` through tsconfig paths. After library edits, run `pnpm watch` in a second terminal. This demo is for dogfooding, not a production host.
 
 ```text
 projects/ng-fixit/                 # publishable library
   src/
     lib/
       shell/ng-fixit/              # public drop-in root
-      components/                   # internal UI (one folder per component)
-      models/                       # domain types and as-const models
-      services/                     # session/store services
-      utils/                        # pure helpers (locator, report, clipboard, …)
-    public-api.ts                   # public API surface
-    styles.css                      # sole stylesheet
-projects/ng-fixit-demo/            # development-only host for dogfooding
-GLOSSARY.md                         # canonical domain language
+      components/
+      models/
+      services/
+      utils/
+    public-api.ts
+    styles.css                     # sole stylesheet
+projects/ng-fixit-demo/            # development-only host
 ```
 
-## Prerequisites
-
-- Node.js (compatible with Angular 22)
-- [pnpm](https://pnpm.io/) 11.x
-
-## Setup
-
-```bash
-pnpm install
-```
-
-## Build
-
-```bash
-pnpm build          # or: pnpm ng build ng-fixit
-```
-
-Output lands in `dist/ng-fixit/`.
-
-Watch mode:
-
-```bash
-pnpm watch
-```
-
-## Demo
-
-The demo app mounts `<ng-fixit />` against sample UI (including a nested Host Component). It consumes the built library from `dist/ng-fixit/`.
-
-```bash
-pnpm build          # required once, or after library changes
-pnpm start          # ng serve ng-fixit-demo
-```
-
-For library edits, run `pnpm watch` in a second terminal.
-
-This workspace demo is for development dogfooding, not a production host.
-
-## Test
-
-```bash
-pnpm test           # library (Vitest via Angular unit-test builder)
-pnpm test:demo      # demo host integration
-```
+Use **pnpm** only. Prefer terms from `GLOSSARY.md`.
 
 ## v1 shape
 
-- **Drop-in UI** — shell-mounted root component owns overlay chrome, Annotation Mode toggle, Annotation list, and copy Report
-- **Annotation Mode** — explicit toggle; when off, the host app receives normal clicks; when on, Target clicks do not run host UI
-- **Target** — single DOM element (hover highlight + click)
-- **Annotation** — Target + required correction note; full CRUD in the list (no reorder)
-- **Report** — structured Markdown (Locator, note, light context including Host Component when discoverable); copy does not clear working Annotations
-- **Lifetime** — in-memory for the current tab; reload clears state
-- **Out of v1** — screenshots, persistence, freeform regions, live agent/MCP bridge
-
-## Contributing notes
-
-- Use **pnpm** only (do not reintroduce `package-lock.json`)
-- Prefer terms from `GLOSSARY.md` in code, UI copy, and docs
-- Library selector prefix is `fixit`; public drop-in root uses selector `ng-fixit`
+- Drop-in root owns overlay chrome, Annotation Mode, the Annotation list, and copy Report
+- Annotation Mode is an explicit toggle. When off, the host gets normal clicks. When on, Target clicks do not run host UI
+- Target is a single DOM element
+- An Annotation is a Target plus a required note. List CRUD, no reorder
+- Report Markdown includes Locator, note, and Host Component when it can be discovered
+- Out of v1: screenshots, persistence, freeform regions, live agent/MCP bridge
 
 ## License
 
-Private / unpublished for now.
+[MIT](./LICENSE)

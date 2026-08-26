@@ -1,0 +1,71 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  inspect:
+    name: inspect
+    runs-on: ubuntu-latest
+    outputs:
+      new: ${{ steps.version.outputs.new }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+
+      - id: version
+        name: Check npm for this version
+        run: |
+          version="$(node -p "require('./projects/ng-fixit/package.json').version")"
+          if npm view "ng-fixit@${version}" version >/dev/null 2>&1; then
+            echo "new=false" >> "${GITHUB_OUTPUT}"
+            echo "ng-fixit@${version} is already on npm. Skipping publish."
+          else
+            echo "new=true" >> "${GITHUB_OUTPUT}"
+            echo "ng-fixit@${version} is not on npm."
+          fi
+
+  publish:
+    name: publish
+    needs: inspect
+    if: needs.inspect.outputs.new == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Install npm for trusted publishing
+        run: npm install -g npm@^11.5.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and format
+        run: pnpm run quality
+
+      - name: Unit tests
+        run: pnpm run test
+
+      - name: Production build
+        run: pnpm run build
+
+      - name: Publish to npm
+        run: bash .github/scripts/publish-if-new.sh
