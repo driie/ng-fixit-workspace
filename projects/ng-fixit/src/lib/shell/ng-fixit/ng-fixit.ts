@@ -8,9 +8,11 @@ import {
   InjectionToken,
   isDevMode,
   signal,
+  viewChild,
 } from '@angular/core';
 
 import { AnnotationList } from '../../components/annotation-list/annotation-list';
+import { CopyToast } from '../../components/copy-toast/copy-toast';
 import { NoteEntry } from '../../components/note-entry/note-entry';
 import { DraftKind } from '../../models/annotation';
 import { AnnotationMode } from '../../models/annotation-mode';
@@ -32,7 +34,7 @@ export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', 
 
 @Component({
   selector: 'ng-fixit',
-  imports: [AnnotationList, NoteEntry],
+  imports: [AnnotationList, CopyToast, NoteEntry],
   templateUrl: './ng-fixit.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [AnnotationSessionStore],
@@ -51,6 +53,7 @@ export class NgFixit {
 
   private readonly hoveredTarget = signal<Element | null>(null);
   private readonly highlightLayoutEpoch = signal<number>(0);
+  private readonly copyToast = viewChild(CopyToast);
 
   protected readonly enabled = this.libraryEnabled;
   protected readonly annotationMode = this.annotationSessionStore.mode;
@@ -98,6 +101,7 @@ export class NgFixit {
 
     const markdown = buildReportMarkdown(this.annotationSessionStore.annotations());
     writeClipboardText(this.document.defaultView, markdown);
+    this.copyToast()?.show();
   }
 
   trackPointerTarget(event: PointerEvent): void {

@@ -512,6 +512,54 @@ describe('NgFixit copy Report', () => {
     expect(markdown).toContain('Fix the save action');
     expect(markdown).toContain('#save-action');
   });
+
+  it('does not show a Report copied toast before copy', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    expect(copyToast()).toBeNull();
+  });
+
+  it('shows a Report copied toast after copy', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(copyToast()?.textContent).toContain('Report copied');
+    expect(copyToastClearButton()).not.toBeNull();
+    expect(copyToastCloseButton()?.getAttribute('aria-label')).toBe('Close');
+  });
+
+  it('hides the Report copied toast when Close is pressed', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    copyToastCloseButton()?.click();
+    await hostFixture.whenStable();
+
+    expect(copyToast()).toBeNull();
+    expect(annotationListNotes()).toEqual(['Fix the button label']);
+  });
+
+  it('clears all Annotations from the toast without dismissing it', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
+    await createAnnotation(
+      hostFixture,
+      hostElement(hostFixture, '[data-testid="host-nested"]'),
+      'Second note',
+    );
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    copyToastClearButton()?.click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual([]);
+    expect(copyToast()?.textContent).toContain('Report copied');
+  });
 });
 
 describe('NgFixit Locator capture', () => {
@@ -821,6 +869,23 @@ const copyReportButton = (fixture: ComponentFixture<unknown>): HTMLButtonElement
   return fixture.nativeElement.querySelector(
     '[data-testid="fixit-copy-report"]',
   ) as HTMLButtonElement;
+};
+
+const copyToast = (): HTMLElement | null => {
+  const toast = document.querySelector('[data-testid="fixit-copy-toast"]');
+  if (!toast || toast.hasAttribute('hidden')) {
+    return null;
+  }
+
+  return toast as HTMLElement;
+};
+
+const copyToastClearButton = (): HTMLButtonElement | null => {
+  return copyToast()?.querySelector('[data-testid="fixit-copy-toast-clear"]') ?? null;
+};
+
+const copyToastCloseButton = (): HTMLButtonElement | null => {
+  return copyToast()?.querySelector('[data-testid="fixit-copy-toast-close"]') ?? null;
 };
 
 const createAnnotation = async (
