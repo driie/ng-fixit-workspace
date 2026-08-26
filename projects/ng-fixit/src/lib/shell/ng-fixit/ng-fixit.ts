@@ -23,6 +23,8 @@ import { captureLocator } from '../../utils/locator';
 import { buildReportMarkdown } from '../../utils/report-builder';
 import {
   highlightBoxFromElement,
+  PointerTarget,
+  PointerTargetKind,
   resolvePointerTarget,
   TargetHighlightBox,
 } from '../../utils/target-highlight';
@@ -42,6 +44,7 @@ export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', 
     class: 'fixit-root',
     '[attr.data-fixit-annotation-mode]': 'annotationMode()',
     '(document:pointermove)': 'trackPointerTarget($event)',
+    '(document:keydown.escape)': 'leaveAnnotationMode($event)',
     '(window:resize)': 'refreshTargetHighlight()',
   },
 })
@@ -51,7 +54,7 @@ export class NgFixit {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly hoveredTarget = signal<Element | null>(null);
+  private readonly pointerTarget = signal<PointerTarget | null>(null);
   private readonly highlightLayoutEpoch = signal<number>(0);
   private readonly copyToast = viewChild(CopyToast);
 
@@ -64,6 +67,9 @@ export class NgFixit {
   protected readonly highlightLocked = computed<boolean>(
     () => this.draft()?.kind === DraftKind.Create,
   );
+  protected readonly highlightBlocked = computed<boolean>(
+    () => this.pointerTarget()?.kind === PointerTargetKind.Blocked,
+  );
   protected readonly hasAnnotations = computed<boolean>(
     () => this.annotationSessionStore.annotations().length > 0,
   );
@@ -74,7 +80,7 @@ export class NgFixit {
       return null;
     }
 
-    const target = this.hoveredTarget();
+    const target = this.pointerTarget()?.element;
     if (!target) {
       return null;
     }
@@ -87,11 +93,23 @@ export class NgFixit {
       return;
     }
 
-    this.annotationSessionStore.toggleAnnotationMode();
-
-    if (this.annotationMode() === AnnotationMode.Off) {
-      this.hoveredTarget.set(null);
+    if (this.annotationMode() === AnnotationMode.On) {
+      this.leaveAnnotationMode();
+      return;
     }
+
+    this.annotationSessionStore.enterAnnotationMode();
+  }
+
+  leaveAnnotationMode(event?: Event): void {
+    if (!this.libraryEnabled || this.annotationMode() !== AnnotationMode.On) {
+      return;
+    }
+
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.annotationSessionStore.leaveAnnotationMode();
+    this.pointerTarget.set(null);
   }
 
   copyReport(): void {
@@ -114,11 +132,12 @@ export class NgFixit {
     }
 
     const nextTarget = resolvePointerTarget(event.target);
-    if (nextTarget === this.hoveredTarget()) {
+    const current = this.pointerTarget();
+    if (nextTarget?.element === current?.element && nextTarget?.kind === current?.kind) {
       return;
     }
 
-    this.hoveredTarget.set(nextTarget);
+    this.pointerTarget.set(nextTarget);
   }
 
   private selectTarget(event: Event): void {
@@ -126,8 +145,8 @@ export class NgFixit {
       return;
     }
 
-    const target = resolvePointerTarget(event.target);
-    if (!target) {
+    const resolved = resolvePointerTarget(event.target);
+    if (resolved?.kind !== PointerTargetKind.Target) {
       return;
     }
 
@@ -138,15 +157,15 @@ export class NgFixit {
       return;
     }
 
-    this.hoveredTarget.set(target);
+    this.pointerTarget.set(resolved);
     this.annotationSessionStore.beginCreate({
-      locator: captureLocator(target),
-      hostComponent: discoverHostComponent(target),
+      locator: captureLocator(resolved.element),
+      hostComponent: discoverHostComponent(resolved.element),
     });
   }
 
   refreshTargetHighlight(): void {
-    if (!this.hoveredTarget()) {
+    if (!this.pointerTarget()) {
       return;
     }
 

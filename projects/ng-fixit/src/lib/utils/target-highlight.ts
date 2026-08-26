@@ -1,5 +1,17 @@
 import { BoundingBox } from '../models/locator';
 
+export const PointerTargetKind = {
+  Target: 'target',
+  Blocked: 'blocked',
+} as const;
+
+export type PointerTargetKind = (typeof PointerTargetKind)[keyof typeof PointerTargetKind];
+
+export interface PointerTarget {
+  element: Element;
+  kind: PointerTargetKind;
+}
+
 export interface TargetHighlightBox {
   top: string;
   left: string;
@@ -7,12 +19,22 @@ export interface TargetHighlightBox {
   height: string;
 }
 
-export const resolvePointerTarget = (eventTarget: EventTarget | null): Element | null => {
-  if (!(eventTarget instanceof Element) || isLibraryChrome(eventTarget)) {
+export const resolvePointerTarget = (eventTarget: EventTarget | null): PointerTarget | null => {
+  if (!(eventTarget instanceof Element)) {
     return null;
   }
 
-  return eventTarget;
+  if (isLibraryChrome(eventTarget)) {
+    return {
+      element: eventTarget.closest('[data-fixit-chrome]') ?? eventTarget,
+      kind: PointerTargetKind.Blocked,
+    };
+  }
+
+  return {
+    element: eventTarget,
+    kind: PointerTargetKind.Target,
+  };
 };
 
 export const highlightBoxFromBoundingBox = (box: BoundingBox): TargetHighlightBox => {

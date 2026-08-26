@@ -77,6 +77,25 @@ describe('NgFixit', () => {
     expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
   });
 
+  it('turns Annotation Mode off when Escape is pressed', async () => {
+    annotationModeToggle(fixture).click();
+    await fixture.whenStable();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+
+    expect(annotationModeToggle(fixture).getAttribute('aria-pressed')).toBe('false');
+    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
+  });
+
+  it('does not turn Annotation Mode on when Escape is pressed while off', async () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+
+    expect(annotationModeToggle(fixture).getAttribute('aria-pressed')).toBe('false');
+    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
+  });
+
   it('keeps Annotation Mode in memory only', async () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
 
@@ -194,7 +213,7 @@ describe('NgFixit Target hover highlight', () => {
     });
   });
 
-  it('does not highlight library chrome as a Target', async () => {
+  it('shows a blocked highlight when the pointer is over library chrome', async () => {
     annotationModeToggle(hostFixture).click();
     await hostFixture.whenStable();
 
@@ -202,11 +221,28 @@ describe('NgFixit Target hover highlight', () => {
     await hostFixture.whenStable();
 
     expect(targetHighlight()).not.toBeNull();
+    expect(targetHighlight()?.classList.contains('fixit-target-highlight-blocked')).toBe(false);
+    expect(blockedHint()).toBeNull();
 
     movePointerOver(annotationModeToggle(hostFixture));
     await hostFixture.whenStable();
 
-    expect(targetHighlight()).toBeNull();
+    expect(targetHighlight()).not.toBeNull();
+    expect(targetHighlight()?.classList.contains('fixit-target-highlight-blocked')).toBe(true);
+    expect(blockedHint()?.textContent?.trim()).toBe('Cannot add a note here');
+  });
+
+  it('does not start an Annotation from a blocked library chrome click', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    movePointerOver(annotationModeToggle(hostFixture));
+    await hostFixture.whenStable();
+    clickTarget(copyReportButton(hostFixture));
+    await hostFixture.whenStable();
+
+    expect(noteEntry()).toBeNull();
+    expect(annotationModeToggle(hostFixture).getAttribute('aria-pressed')).toBe('true');
   });
 
   it('clears the Target highlight when Annotation Mode turns off', async () => {
@@ -384,7 +420,7 @@ describe('NgFixit create Annotation', () => {
     });
   });
 
-  it('cancels note entry when Escape is pressed', async () => {
+  it('leaves Annotation Mode and clears the draft when Escape is pressed', async () => {
     annotationModeToggle(hostFixture).click();
     await hostFixture.whenStable();
 
@@ -397,6 +433,7 @@ describe('NgFixit create Annotation', () => {
 
     expect(annotationListItems()).toEqual([]);
     expect(noteEntry()).toBeNull();
+    expect(annotationModeToggle(hostFixture).getAttribute('aria-pressed')).toBe('false');
   });
 
   it('does not start a second create while note entry is open', async () => {
@@ -773,6 +810,10 @@ const movePointerOver = (element: Element): void => {
 
 const targetHighlight = (): HTMLElement | null => {
   return document.querySelector('[data-testid="fixit-target-highlight"]');
+};
+
+const blockedHint = (): HTMLElement | null => {
+  return document.querySelector('[data-testid="fixit-blocked-hint"]');
 };
 
 const highlightBox = (): {

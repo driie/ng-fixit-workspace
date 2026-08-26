@@ -31,12 +31,24 @@
   data-fixit-chrome
   data-testid="fixit-target-highlight"
   [class.fixit-target-highlight-locked]="highlightLocked()"
+  [class.fixit-target-highlight-blocked]="highlightBlocked()"
   [style.top]="box.top"
   [style.left]="box.left"
   [style.width]="box.width"
   [style.height]="box.height"
 ></div>
-} @if (draft()) {
+@if (highlightBlocked()) {
+<div
+  class="fixit-blocked-hint"
+  data-fixit-chrome
+  data-testid="fixit-blocked-hint"
+  aria-hidden="true"
+  [style.top]="box.top"
+  [style.left]="box.left"
+>
+  Cannot add a note here
+</div>
+} } @if (draft()) {
 <fixit-note-entry />
 } @if (annotationModePressed() && hasAnnotations()) {
 <fixit-annotation-list />
