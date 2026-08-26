@@ -1,3 +1,17 @@
+import { BoundingBox } from '../models/locator';
+
+export const PointerTargetKind = {
+  Target: 'target',
+  Blocked: 'blocked',
+} as const;
+
+export type PointerTargetKind = (typeof PointerTargetKind)[keyof typeof PointerTargetKind];
+
+export interface PointerTarget {
+  element: Element;
+  kind: PointerTargetKind;
+}
+
 export interface TargetHighlightBox {
   top: string;
   left: string;
@@ -5,23 +19,35 @@ export interface TargetHighlightBox {
   height: string;
 }
 
-export const resolvePointerTarget = (eventTarget: EventTarget | null): Element | null => {
-  if (!(eventTarget instanceof Element) || isLibraryChrome(eventTarget)) {
+export const resolvePointerTarget = (eventTarget: EventTarget | null): PointerTarget | null => {
+  if (!(eventTarget instanceof Element)) {
     return null;
   }
 
-  return eventTarget;
+  if (isLibraryChrome(eventTarget)) {
+    return {
+      element: eventTarget.closest('[data-fixit-chrome]') ?? eventTarget,
+      kind: PointerTargetKind.Blocked,
+    };
+  }
+
+  return {
+    element: eventTarget,
+    kind: PointerTargetKind.Target,
+  };
+};
+
+export const highlightBoxFromBoundingBox = (box: BoundingBox): TargetHighlightBox => {
+  return {
+    top: `${box.top}px`,
+    left: `${box.left}px`,
+    width: `${box.width}px`,
+    height: `${box.height}px`,
+  };
 };
 
 export const highlightBoxFromElement = (target: Element): TargetHighlightBox => {
-  const rect = target.getBoundingClientRect();
-
-  return {
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-  };
+  return highlightBoxFromBoundingBox(target.getBoundingClientRect());
 };
 
 const isLibraryChrome = (element: Element): boolean => {

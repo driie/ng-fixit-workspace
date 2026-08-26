@@ -50,7 +50,7 @@
                 "input": "projects/ng-fixit-demo/public"
               }
             ],
-            "styles": ["projects/ng-fixit-demo/src/styles.css"]
+            "styles": ["projects/ng-fixit-demo/src/styles.css", "dist/ng-fixit/styles.css"]
           },
           "configurations": {
             "production": {

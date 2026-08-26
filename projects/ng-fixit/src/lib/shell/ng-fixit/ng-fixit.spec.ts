@@ -40,6 +40,18 @@ describe('NgFixit', () => {
     expect(toggle).not.toBeNull();
   });
 
+  it('uses an icon-only Annotation Mode control with a tooltip', () => {
+    const toggle = annotationModeToggle(fixture);
+
+    expect(toggle.getAttribute('aria-label')).toBe('Annotation Mode');
+    expect(toggle.querySelector('svg')).not.toBeNull();
+    expect(toggle.textContent?.trim()).toBe('');
+  });
+
+  it('hides Copy Report when Annotation Mode is off', () => {
+    expect(copyReportButton(fixture)).toBeNull();
+  });
+
   it('starts with Annotation Mode off', () => {
     const toggle = annotationModeToggle(fixture);
 
@@ -65,14 +77,23 @@ describe('NgFixit', () => {
     expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
   });
 
-  it('lets host content receive clicks when Annotation Mode is off', async () => {
-    const hostFixture = TestBed.createComponent(HostWithNgFixit);
-    await hostFixture.whenStable();
+  it('turns Annotation Mode off when Escape is pressed', async () => {
+    annotationModeToggle(fixture).click();
+    await fixture.whenStable();
 
-    hostButton(hostFixture).click();
-    await hostFixture.whenStable();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
 
-    expect(hostFixture.componentInstance.hostClicks).toBe(1);
+    expect(annotationModeToggle(fixture).getAttribute('aria-pressed')).toBe('false');
+    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
+  });
+
+  it('does not turn Annotation Mode on when Escape is pressed while off', async () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+
+    expect(annotationModeToggle(fixture).getAttribute('aria-pressed')).toBe('false');
+    expect(fixture.nativeElement.getAttribute('data-fixit-annotation-mode')).toBe('off');
   });
 
   it('keeps Annotation Mode in memory only', async () => {
@@ -86,6 +107,50 @@ describe('NgFixit', () => {
     expect(setItem).not.toHaveBeenCalled();
 
     setItem.mockRestore();
+  });
+});
+
+describe('NgFixit host click routing', () => {
+  let hostFixture: ComponentFixture<HostWithNgFixit>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HostWithNgFixit],
+    }).compileComponents();
+
+    hostFixture = TestBed.createComponent(HostWithNgFixit);
+    await hostFixture.whenStable();
+  });
+
+  it('lets host content receive clicks when Annotation Mode is off', async () => {
+    hostButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(hostFixture.componentInstance.hostClicks).toBe(1);
+  });
+
+  it('does not let host content receive clicks when Annotation Mode is on', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    hostButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(hostFixture.componentInstance.hostClicks).toBe(0);
+    expect(noteEntry()).not.toBeNull();
+  });
+
+  it('still blocks host clicks while note entry is open', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+
+    hostButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(hostFixture.componentInstance.hostClicks).toBe(0);
   });
 });
 
@@ -148,7 +213,7 @@ describe('NgFixit Target hover highlight', () => {
     });
   });
 
-  it('does not highlight library chrome as a Target', async () => {
+  it('shows a blocked highlight when the pointer is over library chrome', async () => {
     annotationModeToggle(hostFixture).click();
     await hostFixture.whenStable();
 
@@ -156,11 +221,28 @@ describe('NgFixit Target hover highlight', () => {
     await hostFixture.whenStable();
 
     expect(targetHighlight()).not.toBeNull();
+    expect(targetHighlight()?.classList.contains('fixit-target-highlight-blocked')).toBe(false);
+    expect(blockedHint()).toBeNull();
 
     movePointerOver(annotationModeToggle(hostFixture));
     await hostFixture.whenStable();
 
-    expect(targetHighlight()).toBeNull();
+    expect(targetHighlight()).not.toBeNull();
+    expect(targetHighlight()?.classList.contains('fixit-target-highlight-blocked')).toBe(true);
+    expect(blockedHint()?.textContent?.trim()).toBe('Cannot add a note here');
+  });
+
+  it('does not start an Annotation from a blocked library chrome click', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    movePointerOver(annotationModeToggle(hostFixture));
+    await hostFixture.whenStable();
+    clickTarget(copyReportButton(hostFixture));
+    await hostFixture.whenStable();
+
+    expect(noteEntry()).toBeNull();
+    expect(annotationModeToggle(hostFixture).getAttribute('aria-pressed')).toBe('true');
   });
 
   it('clears the Target highlight when Annotation Mode turns off', async () => {
@@ -301,7 +383,44 @@ describe('NgFixit create Annotation', () => {
     setItem.mockRestore();
   });
 
-  it('cancels note entry when Escape is pressed', async () => {
+  it('commits the note when Enter is pressed', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+    setNoteEntryValue('Fix via Enter');
+
+    noteEntryInput().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual(['Fix via Enter']);
+    expect(noteEntry()).toBeNull();
+  });
+
+  it('keeps the Target highlight on the selected element while note entry is open', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    const button = hostButton(hostFixture);
+    mockElementRect(button, { x: 10, y: 20, width: 100, height: 40 });
+    clickTarget(button);
+    await hostFixture.whenStable();
+
+    movePointerOver(hostElement(hostFixture, '[data-testid="host-nested"]'));
+    await hostFixture.whenStable();
+
+    expect(highlightBox()).toEqual({
+      top: '20px',
+      left: '10px',
+      width: '100px',
+      height: '40px',
+    });
+  });
+
+  it('leaves Annotation Mode and clears the draft when Escape is pressed', async () => {
     annotationModeToggle(hostFixture).click();
     await hostFixture.whenStable();
 
@@ -314,6 +433,7 @@ describe('NgFixit create Annotation', () => {
 
     expect(annotationListItems()).toEqual([]);
     expect(noteEntry()).toBeNull();
+    expect(annotationModeToggle(hostFixture).getAttribute('aria-pressed')).toBe('false');
   });
 
   it('does not start a second create while note entry is open', async () => {
@@ -367,7 +487,12 @@ describe('NgFixit copy Report', () => {
     await hostFixture.whenStable();
   });
 
-  it('shows a Copy Report control when the library is enabled', () => {
+  it('shows a Copy Report control when Annotation Mode is on', async () => {
+    expect(copyReportButton(hostFixture)).toBeNull();
+
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
     expect(copyReportButton(hostFixture)).toBeTruthy();
   });
 
@@ -424,6 +549,54 @@ describe('NgFixit copy Report', () => {
     expect(markdown).toContain('Fix the save action');
     expect(markdown).toContain('#save-action');
   });
+
+  it('does not show a Report copied toast before copy', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    expect(copyToast()).toBeNull();
+  });
+
+  it('shows a Report copied toast after copy', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(copyToast()?.textContent).toContain('Report copied');
+    expect(copyToastClearButton()).not.toBeNull();
+    expect(copyToastCloseButton()?.getAttribute('aria-label')).toBe('Close');
+  });
+
+  it('hides the Report copied toast when Close is pressed', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    copyToastCloseButton()?.click();
+    await hostFixture.whenStable();
+
+    expect(copyToast()).toBeNull();
+    expect(annotationListNotes()).toEqual(['Fix the button label']);
+  });
+
+  it('clears all Annotations from the toast without dismissing it', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
+    await createAnnotation(
+      hostFixture,
+      hostElement(hostFixture, '[data-testid="host-nested"]'),
+      'Second note',
+    );
+
+    copyReportButton(hostFixture).click();
+    await hostFixture.whenStable();
+
+    copyToastClearButton()?.click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual([]);
+    expect(copyToast()?.textContent).toContain('Report copied');
+  });
 });
 
 describe('NgFixit Locator capture', () => {
@@ -473,6 +646,18 @@ describe('NgFixit Annotation list management', () => {
     await hostFixture.whenStable();
 
     expect(annotationListNotes()).toEqual(['Second note']);
+  });
+
+  it('hides the Annotation list when Annotation Mode turns off', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Keep me while mode is on');
+
+    expect(annotationListNotes()).toEqual(['Keep me while mode is on']);
+
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(document.querySelector('[data-testid="fixit-annotation-list"]')).toBeNull();
+    expect(copyReportButton(hostFixture)).toBeNull();
   });
 
   it('clears all Annotations from the working list', async () => {
@@ -627,6 +812,10 @@ const targetHighlight = (): HTMLElement | null => {
   return document.querySelector('[data-testid="fixit-target-highlight"]');
 };
 
+const blockedHint = (): HTMLElement | null => {
+  return document.querySelector('[data-testid="fixit-blocked-hint"]');
+};
+
 const highlightBox = (): {
   top: string;
   left: string;
@@ -721,6 +910,23 @@ const copyReportButton = (fixture: ComponentFixture<unknown>): HTMLButtonElement
   return fixture.nativeElement.querySelector(
     '[data-testid="fixit-copy-report"]',
   ) as HTMLButtonElement;
+};
+
+const copyToast = (): HTMLElement | null => {
+  const toast = document.querySelector('[data-testid="fixit-copy-toast"]');
+  if (!toast || toast.hasAttribute('hidden')) {
+    return null;
+  }
+
+  return toast as HTMLElement;
+};
+
+const copyToastClearButton = (): HTMLButtonElement | null => {
+  return copyToast()?.querySelector('[data-testid="fixit-copy-toast-clear"]') ?? null;
+};
+
+const copyToastCloseButton = (): HTMLButtonElement | null => {
+  return copyToast()?.querySelector('[data-testid="fixit-copy-toast-close"]') ?? null;
 };
 
 const createAnnotation = async (

@@ -17,7 +17,7 @@ The structured Markdown artifact containing one or more Annotations that a devel
 _Avoid_: payload, dump, export file, ticket
 
 **Annotation Mode**:
-The active state in which the developer can select Targets and create Annotations.
+The active state in which the developer can select Targets and create Annotations. Target clicks are captured and do not run the host UI.
 _Avoid_: edit mode, inspect mode, debug mode, capture mode
 
 **Locator**:

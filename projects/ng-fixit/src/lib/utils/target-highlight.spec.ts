@@ -1,26 +1,39 @@
 import { vi } from 'vitest';
 
-import { highlightBoxFromElement, resolvePointerTarget } from './target-highlight';
+import {
+  highlightBoxFromElement,
+  PointerTargetKind,
+  resolvePointerTarget,
+} from './target-highlight';
 
 describe('resolvePointerTarget', () => {
-  it('returns the element under the pointer when it is not library chrome', () => {
+  it('returns a Target for the element under the pointer when it is not library chrome', () => {
     const target = document.createElement('button');
     document.body.append(target);
 
-    expect(resolvePointerTarget(target)).toBe(target);
+    expect(resolvePointerTarget(target)).toEqual({
+      element: target,
+      kind: PointerTargetKind.Target,
+    });
 
     target.remove();
   });
 
-  it('returns null for library chrome and descendants', () => {
+  it('returns a blocked pointer target for library chrome and descendants', () => {
     const chrome = document.createElement('div');
     chrome.setAttribute('data-fixit-chrome', '');
     const nested = document.createElement('button');
     chrome.append(nested);
     document.body.append(chrome);
 
-    expect(resolvePointerTarget(chrome)).toBeNull();
-    expect(resolvePointerTarget(nested)).toBeNull();
+    expect(resolvePointerTarget(chrome)).toEqual({
+      element: chrome,
+      kind: PointerTargetKind.Blocked,
+    });
+    expect(resolvePointerTarget(nested)).toEqual({
+      element: chrome,
+      kind: PointerTargetKind.Blocked,
+    });
 
     chrome.remove();
   });

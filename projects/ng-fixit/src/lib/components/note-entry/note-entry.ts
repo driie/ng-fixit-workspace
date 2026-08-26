@@ -48,6 +48,15 @@ export class NoteEntry {
     this.annotationSessionStore.updateDraftNote(target.value);
   }
 
+  commitIfEnter(event: KeyboardEvent): void {
+    if (event.key !== 'Enter' || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    this.commitAnnotation();
+  }
+
   commitAnnotation(): void {
     this.annotationSessionStore.commitDraft();
   }

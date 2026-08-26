@@ -2,13 +2,18 @@
 <div class="fixit-chrome" data-fixit-chrome>
   <button
     type="button"
-    class="fixit-chrome-button"
+    class="fixit-chrome-button fixit-chrome-button-icon"
     data-testid="fixit-annotation-mode-toggle"
+    aria-label="Annotation Mode"
     [attr.aria-pressed]="annotationModePressed()"
     (click)="toggleAnnotationMode()"
   >
-    Annotation Mode
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
   </button>
+  @if (annotationModePressed()) {
   <button
     type="button"
     class="fixit-chrome-button"
@@ -17,19 +22,34 @@
   >
     Copy Report
   </button>
+  }
 </div>
+<fixit-copy-toast />
 @if (targetHighlightBox(); as box) {
 <div
   class="fixit-target-highlight"
   data-fixit-chrome
   data-testid="fixit-target-highlight"
+  [class.fixit-target-highlight-locked]="highlightLocked()"
+  [class.fixit-target-highlight-blocked]="highlightBlocked()"
   [style.top]="box.top"
   [style.left]="box.left"
   [style.width]="box.width"
   [style.height]="box.height"
 ></div>
-} @if (draft()) {
+@if (highlightBlocked()) {
+<div
+  class="fixit-blocked-hint"
+  data-fixit-chrome
+  data-testid="fixit-blocked-hint"
+  aria-hidden="true"
+  [style.top]="box.top"
+  [style.left]="box.left"
+>
+  Cannot add a note here
+</div>
+} } @if (draft()) {
 <fixit-note-entry />
-}
+} @if (annotationModePressed() && hasAnnotations()) {
 <fixit-annotation-list />
-}
+} }

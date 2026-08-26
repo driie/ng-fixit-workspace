@@ -8,10 +8,13 @@ import {
   InjectionToken,
   isDevMode,
   signal,
+  viewChild,
 } from '@angular/core';
 
 import { AnnotationList } from '../../components/annotation-list/annotation-list';
+import { CopyToast } from '../../components/copy-toast/copy-toast';
 import { NoteEntry } from '../../components/note-entry/note-entry';
+import { DraftKind } from '../../models/annotation';
 import { AnnotationMode } from '../../models/annotation-mode';
 import { AnnotationSessionStore } from '../../services/annotation-session-store';
 import { writeClipboardText } from '../../utils/clipboard';
@@ -20,6 +23,8 @@ import { captureLocator } from '../../utils/locator';
 import { buildReportMarkdown } from '../../utils/report-builder';
 import {
   highlightBoxFromElement,
+  PointerTarget,
+  PointerTargetKind,
   resolvePointerTarget,
   TargetHighlightBox,
 } from '../../utils/target-highlight';
@@ -31,7 +36,7 @@ export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', 
 
 @Component({
   selector: 'ng-fixit',
-  imports: [AnnotationList, NoteEntry],
+  imports: [AnnotationList, CopyToast, NoteEntry],
   templateUrl: './ng-fixit.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [AnnotationSessionStore],
@@ -39,7 +44,7 @@ export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', 
     class: 'fixit-root',
     '[attr.data-fixit-annotation-mode]': 'annotationMode()',
     '(document:pointermove)': 'trackPointerTarget($event)',
-    '(document:click)': 'selectTarget($event)',
+    '(document:keydown.escape)': 'leaveAnnotationMode($event)',
     '(window:resize)': 'refreshTargetHighlight()',
   },
 })
@@ -49,14 +54,24 @@ export class NgFixit {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly hoveredTarget = signal<Element | null>(null);
+  private readonly pointerTarget = signal<PointerTarget | null>(null);
   private readonly highlightLayoutEpoch = signal<number>(0);
+  private readonly copyToast = viewChild(CopyToast);
 
   protected readonly enabled = this.libraryEnabled;
   protected readonly annotationMode = this.annotationSessionStore.mode;
   protected readonly draft = this.annotationSessionStore.draft;
   protected readonly annotationModePressed = computed<boolean>(
     () => this.annotationMode() === AnnotationMode.On,
+  );
+  protected readonly highlightLocked = computed<boolean>(
+    () => this.draft()?.kind === DraftKind.Create,
+  );
+  protected readonly highlightBlocked = computed<boolean>(
+    () => this.pointerTarget()?.kind === PointerTargetKind.Blocked,
+  );
+  protected readonly hasAnnotations = computed<boolean>(
+    () => this.annotationSessionStore.annotations().length > 0,
   );
   protected readonly targetHighlightBox = computed<TargetHighlightBox | null>(() => {
     this.highlightLayoutEpoch();
@@ -65,7 +80,7 @@ export class NgFixit {
       return null;
     }
 
-    const target = this.hoveredTarget();
+    const target = this.pointerTarget()?.element;
     if (!target) {
       return null;
     }
@@ -78,11 +93,23 @@ export class NgFixit {
       return;
     }
 
-    this.annotationSessionStore.toggleAnnotationMode();
-
-    if (this.annotationMode() === AnnotationMode.Off) {
-      this.hoveredTarget.set(null);
+    if (this.annotationMode() === AnnotationMode.On) {
+      this.leaveAnnotationMode();
+      return;
     }
+
+    this.annotationSessionStore.enterAnnotationMode();
+  }
+
+  leaveAnnotationMode(event?: Event): void {
+    if (!this.libraryEnabled || this.annotationMode() !== AnnotationMode.On) {
+      return;
+    }
+
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.annotationSessionStore.leaveAnnotationMode();
+    this.pointerTarget.set(null);
   }
 
   copyReport(): void {
@@ -92,6 +119,7 @@ export class NgFixit {
 
     const markdown = buildReportMarkdown(this.annotationSessionStore.annotations());
     writeClipboardText(this.document.defaultView, markdown);
+    this.copyToast()?.show();
   }
 
   trackPointerTarget(event: PointerEvent): void {
@@ -99,39 +127,45 @@ export class NgFixit {
       return;
     }
 
-    const nextTarget = resolvePointerTarget(event.target);
-    if (nextTarget === this.hoveredTarget()) {
+    if (this.draft()?.kind === DraftKind.Create) {
       return;
     }
 
-    this.hoveredTarget.set(nextTarget);
+    const nextTarget = resolvePointerTarget(event.target);
+    const current = this.pointerTarget();
+    if (nextTarget?.element === current?.element && nextTarget?.kind === current?.kind) {
+      return;
+    }
+
+    this.pointerTarget.set(nextTarget);
   }
 
-  selectTarget(event: MouseEvent): void {
+  private selectTarget(event: Event): void {
     if (!this.libraryEnabled || this.annotationMode() !== AnnotationMode.On) {
       return;
     }
 
-    const target = resolvePointerTarget(event.target);
-    if (!target) {
-      return;
-    }
-
-    if (this.draft()) {
+    const resolved = resolvePointerTarget(event.target);
+    if (resolved?.kind !== PointerTargetKind.Target) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
 
+    if (this.draft()) {
+      return;
+    }
+
+    this.pointerTarget.set(resolved);
     this.annotationSessionStore.beginCreate({
-      locator: captureLocator(target),
-      hostComponent: discoverHostComponent(target),
+      locator: captureLocator(resolved.element),
+      hostComponent: discoverHostComponent(resolved.element),
     });
   }
 
   refreshTargetHighlight(): void {
-    if (!this.hoveredTarget()) {
+    if (!this.pointerTarget()) {
       return;
     }
 
@@ -143,9 +177,15 @@ export class NgFixit {
       this.refreshTargetHighlight();
     };
 
+    const selectTarget = (event: Event): void => {
+      this.selectTarget(event);
+    };
+
     this.document.addEventListener('scroll', refreshOnScroll, true);
+    this.document.addEventListener('click', selectTarget, true);
     this.destroyRef.onDestroy(() => {
       this.document.removeEventListener('scroll', refreshOnScroll, true);
+      this.document.removeEventListener('click', selectTarget, true);
     });
   }
 }
