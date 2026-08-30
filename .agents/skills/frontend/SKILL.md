@@ -9,9 +9,80 @@ description: >-
 
 # frontend — ng-fixit library conventions
 
-Procedural detail for scaffolding and modifying Angular code under `projects/ng-fixit/**`.
+Procedural detail for scaffolding and modifying Angular code under `projects/ng-fixit/**`. Hard musts: `AGENTS.md`.
 
-TypeScript file structure (imports, member order, naming, specs): `.grok/rules/typescript.md`.
+## TypeScript file structure
+
+### Imports
+
+Tiered groups with a blank line between tiers. Alphabetical within each tier.
+
+1. **Angular** — `@angular/...`
+2. **Third-party** — `rxjs`, other packages
+3. **Library** — relative imports within `projects/ng-fixit/src/`
+
+RxJS operators from `rxjs`, not `rxjs/operators`.
+
+```ts
+import { EMPTY, catchError, finalize, switchMap, tap } from 'rxjs';
+```
+
+### Class member order
+
+Blank line between tiers.
+
+1. **Injected dependencies** — `private readonly x = inject(...)` (feature → shared → framework)
+2. **Private state** — `private readonly model = signal(...)`
+3. **Template / public API** — `protected readonly` (static config, then reactive bindings, then derived values), then `readonly` inputs/outputs. Do not place template model re-exports here.
+
+   ```ts
+   protected readonly modeOptions: ModeOption[] = [/* … */];
+   protected readonly annotations = this.annotationStore.annotations;
+   protected readonly hasAnnotations = computed<boolean>(() => this.annotations().length > 0);
+   ```
+
+4. **Methods** — class methods; constructor last in this tier when present
+5. **Template model re-exports** — last in the class (`protected readonly AnnotationMode = AnnotationMode`)
+
+### Visibility
+
+| Modifier                 | Use                                             |
+| ------------------------ | ----------------------------------------------- |
+| `private readonly`       | Implementation detail, inject, private signals  |
+| `protected readonly`     | Fields bound only in this component's template  |
+| `readonly` (no modifier) | Inputs, outputs, or API consumed by hosts/tests |
+
+### Types
+
+`interface` for object shapes in `lib/models/`. `type` for unions. No TypeScript `enum`. Pure functions that build or format models live under `lib/utils/` (import types from `models/`).
+
+### Array iteration
+
+Prefer functional array methods over `for...of` in `.ts` files: `map`, `filter`, `reduce`, `forEach`, `some`, `every`, `find`.
+
+```ts
+const total = items.reduce((sum, item) => sum + item.value, 0);
+```
+
+### Naming
+
+| Symbol           | Pattern                                  | Examples                                     |
+| ---------------- | ---------------------------------------- | -------------------------------------------- |
+| Action handlers  | Outcome, not the DOM event               | `addAnnotation`, `copyReport`. Not `onClick` |
+| Boolean signals  | State adjective / noun                   | `annotationModeActive`, `hasAnnotations`     |
+| Model signals    | Domain noun                              | `draftNote`, `activeTarget`                  |
+| Module constants | `SCREAMING_SNAKE`                        | `REPORT_MIME_TYPE`                           |
+| Files / folders  | kebab-case                               | `annotation-list.ts`                         |
+| Selectors        | `fixit-` + kebab-case (root: `ng-fixit`) | `fixit-annotation-list`                      |
+
+### Spec files
+
+Same import, member, arrow, and naming rules as production `.ts`.
+
+- File pairs: `foo.spec.ts` beside `foo.ts`
+- `describe` names the subject
+- `it` states behavior (`'copies report markdown to the clipboard'`), not `'should …'`
+- Nested `describe` only when grouping distinct behaviors
 
 ## Component file shape — `.ts` + `.html` are mandatory
 
@@ -20,7 +91,7 @@ Every Angular component MUST be split into two files:
 - `foo.ts` — the `@Component` class
 - `foo.html` — the template
 
-**Never** use inline templates (no `template: \`...\``). **Never** add `styleUrl`, `styleUrls`, or `styles: [...]` — all styles go in the global stylesheet.
+**Never** use inline templates (no `template: \`...\``). **Never** add `styleUrl`, `styleUrls`, or `styles: [...]`. All styles go in the global stylesheet. Prefer `input()`/`output()`/`model()`over`@Input`/`@Output` for new code.
 
 ```ts
 import { ChangeDetectionStrategy, Component } from '@angular/core';
@@ -113,7 +184,7 @@ private readonly document = inject(DOCUMENT);
 
 ## Language — English only
 
-Every piece of code under `projects/ng-fixit/**` is English: identifiers, templates, styles content if textual, string literals, UI labels, messages, and tests. Use `GLOSSARY.md` product terms where they apply. Full policy: `.grok/rules/project.md`.
+Every piece of code under `projects/ng-fixit/**` is English: identifiers, templates, styles content if textual, string literals, UI labels, messages, and tests. Use `GLOSSARY.md` product terms where they apply. Full policy: `AGENTS.md`.
 
 ## Domain models
 
@@ -139,7 +210,7 @@ Do not rename these concepts to comment/pin/issue/payload/etc.
 
 ## Signal typing
 
-Type every `signal()` and `computed()` through its generic parameter — never on the variable, never via a `computed`'s inline return-type annotation. Full rule: `typescript.md`.
+Type every `signal()` and `computed()` through its generic parameter — never on the variable, never via a `computed`'s inline return-type annotation. Full rule: `AGENTS.md`.
 
 ```ts
 private readonly draftNote = signal<string>('');
@@ -148,11 +219,38 @@ protected readonly canAdd = computed<boolean>(() => this.draftNote().trim().leng
 
 ## Finite string unions
 
-For fixed string sets, use the `as const` object pattern — see `typescript.md`.
+For fixed string sets, use the `as const` object pattern:
+
+```ts
+export const AnnotationMode = {
+  Off: 'off',
+  On: 'on',
+} as const;
+
+export type AnnotationMode = (typeof AnnotationMode)[keyof typeof AnnotationMode];
+
+export const ANNOTATION_MODES = Object.values(AnnotationMode) as AnnotationMode[];
+```
 
 ## Arrow functions
 
-Standalone functions and callbacks use arrow syntax. Do not use `function` declarations. Class methods keep standard method syntax. Details: `.grok/rules/arrow-functions.md`.
+Standalone functions and callbacks use arrow syntax. Do not use `function` declarations or named `function` expressions. Module-level helpers export as `const` with an explicit return type when not `void`.
+
+```ts
+export const buildLocator = (element: Element): Locator => {
+  return {
+    /* … */
+  };
+};
+
+export const configureFixitTestingModule = async (imports: Type<unknown>[] = []): Promise<void> => {
+  await TestBed.configureTestingModule({
+    imports,
+  }).compileComponents();
+};
+```
+
+Exempt: class methods on `@Component`, `@Injectable`, `@Pipe` (`transform()`), and constructors.
 
 ## Event / action handler naming
 
@@ -171,6 +269,7 @@ When implementing the root entry or mode toggle:
 - Default off when not in development.
 - Prefer `isDevMode()` from `@angular/core`, or an injectable config token the host can set.
 - Do not ship always-on capture UI for production hosts.
+- Annotation Mode must not trap keyboard users. Toggle off and Escape are the designed exits.
 
 ## Testing
 
