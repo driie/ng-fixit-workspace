@@ -1,100 +1,80 @@
 # ng-fixit
 
-Development-only Angular library that turns visual UI selections and correction notes into paste-ready Markdown for AI coding agents.
+Development-only Angular library for turning visual UI selections and correction notes into a Markdown **Report** for an AI coding agent.
 
-Mount a drop-in root component, enter **Annotation Mode**, select a **Target**, add a required correction note, then copy a **Report** into your agent.
+## Requirements
 
-Domain terms live in [`GLOSSARY.md`](./GLOSSARY.md).
+- Angular 22
+- `@angular/core` and `@angular/common` `^22.1.0`
 
-## Status
-
-v1 library path is in place. Use the workspace demo to dogfood the drop-in root.
-
-|         |                                                       |
-| ------- | ----------------------------------------------------- |
-| Package | `ng-fixit`                                            |
-| Stack   | Angular 22, TypeScript ~6, Vitest, pnpm               |
-| Prefix  | `fixit` (public root selector: `ng-fixit`)            |
-| Runtime | Development only (`isDevMode` / equivalent host gate) |
-
-## Workspace layout
-
-```text
-projects/ng-fixit/                 # publishable library
-  src/
-    lib/
-      shell/ng-fixit/              # public drop-in root
-      components/                   # internal UI (one folder per component)
-      models/                       # domain types and as-const models
-      services/                     # session/store services
-      utils/                        # pure helpers (locator, report, clipboard, …)
-    public-api.ts                   # public API surface
-    styles.css                      # sole stylesheet
-projects/ng-fixit-demo/            # development-only host for dogfooding
-GLOSSARY.md                         # canonical domain language
-```
-
-## Prerequisites
-
-- Node.js (compatible with Angular 22)
-- [pnpm](https://pnpm.io/) 11.x
-
-## Setup
+## Install
 
 ```bash
-pnpm install
+pnpm add ng-fixit
 ```
 
-## Build
+Add the library stylesheet to the host application's `angular.json` `styles` array:
 
-```bash
-pnpm build          # or: pnpm ng build ng-fixit
+```json
+"styles": ["src/styles.css", "node_modules/ng-fixit/styles.css"]
 ```
 
-Output lands in `dist/ng-fixit/`.
+Do not rely on a TypeScript `import 'ng-fixit/styles.css'`. It can fail type checking with `TS2882` and may not inject the stylesheet with Angular's application builder.
 
-Watch mode:
+## Mount ng-fixit
 
-```bash
-pnpm watch
+Import `NgFixit` into the application shell:
+
+```ts
+import { Component } from '@angular/core';
+import { NgFixit } from 'ng-fixit';
+
+@Component({
+  imports: [NgFixit],
+  templateUrl: './app.html',
+})
+export class App {}
 ```
 
-## Demo
+Mount the component once in the shell template:
 
-The demo app mounts `<ng-fixit />` against sample UI (including a nested Host Component). It consumes the built library from `dist/ng-fixit/`.
-
-```bash
-pnpm build          # required once, or after library changes
-pnpm start          # ng serve ng-fixit-demo
+```html
+<ng-fixit />
 ```
 
-For library edits, run `pnpm watch` in a second terminal.
+`ng-fixit` defaults to Angular's `isDevMode()`, so production builds leave it disabled.
 
-This workspace demo is for development dogfooding, not a production host.
+To explicitly disable it, provide `NG_FIXIT_ENABLED` from the application configuration or a parent injector:
 
-## Test
+```ts
+import { NG_FIXIT_ENABLED } from 'ng-fixit';
 
-```bash
-pnpm test           # library (Vitest via Angular unit-test builder)
-pnpm test:demo      # demo host integration
+{ provide: NG_FIXIT_ENABLED, useValue: false }
 ```
 
-## v1 shape
+## Use Annotation Mode
 
-- **Drop-in UI** — shell-mounted root component owns overlay chrome, Annotation Mode toggle, Annotation list, and copy Report
-- **Annotation Mode** — explicit toggle; when off, the host app receives normal clicks; when on, Target clicks do not run host UI
-- **Target** — single DOM element (hover highlight + click)
-- **Annotation** — Target + required correction note; full CRUD in the list (no reorder)
-- **Report** — structured Markdown (Locator, note, light context including Host Component when discoverable); copy does not clear working Annotations
-- **Lifetime** — in-memory for the current tab; reload clears state
-- **Out of v1** — screenshots, persistence, freeform regions, live agent/MCP bridge
+1. Run the host application with its usual development server.
+2. Click the **Annotation Mode** button at the bottom right.
+3. Hover the host UI. A highlight marks a selectable **Target**.
+4. Click a Target, type a required note, and press Enter to add the **Annotation**.
+5. Edit, delete, or clear Annotations from the list when needed.
+6. Click **Copy Report** and paste the Markdown into your AI coding agent.
+7. Press Escape or use the toggle to leave Annotation Mode.
 
-## Contributing notes
+Annotations live in memory for the current browser tab. Reloading the page clears them. Copying a Report does not clear the Annotation list.
 
-- Use **pnpm** only (do not reintroduce `package-lock.json`)
-- Prefer terms from `GLOSSARY.md` in code, UI copy, and docs
-- Library selector prefix is `fixit`; public drop-in root uses selector `ng-fixit`
+Library chrome is not selectable as a Target. When Annotation Mode is active, Target clicks are captured so the host UI does not perform its normal click action.
 
-## License
+## Public API
 
-Private / unpublished for now.
+- `NgFixit`
+- `NG_FIXIT_ENABLED`
+- `AnnotationMode`
+- `ANNOTATION_MODES`
+
+## Source and license
+
+Source and product terminology: [github.com/driie/ng-fixit-workspace](https://github.com/driie/ng-fixit-workspace).
+
+Licensed under the [MIT License](./LICENSE).

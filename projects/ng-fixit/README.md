@@ -1,38 +1,80 @@
 # ng-fixit
 
-Development-only Angular library: visual **Annotations** → paste-ready **Report** Markdown for AI coding agents.
+Development-only Angular library for turning visual UI selections and correction notes into a Markdown **Report** for an AI coding agent.
 
-Do not ship Annotation Mode to production users. The drop-in root stays inert unless `NG_FIXIT_ENABLED` is true. That token defaults to Angular `isDevMode()`.
+## Requirements
 
-## Host integration
+- Angular 22
+- `@angular/core` and `@angular/common` `^22.1.0`
 
-Mount the drop-in root once at the application shell. Gate it with `isDevMode()` (or provide `NG_FIXIT_ENABLED`) so production builds do not render the chrome.
-
-```ts
-import { isDevMode } from '@angular/core';
-import { NgFixit } from 'ng-fixit';
-import 'ng-fixit/styles.css';
-```
-
-```html
-@if (isDevMode()) {
-<ng-fixit />
-}
-```
-
-Load `ng-fixit/styles.css` once in the host. If TypeScript reports `TS2882` on that side-effect import, add `declare module 'ng-fixit/styles.css';` in the host.
-
-Public surface: `NgFixit`, `AnnotationMode`, `ANNOTATION_MODES`, `NG_FIXIT_ENABLED`.
-
-## Workspace demo
-
-This repo includes `projects/ng-fixit-demo/`, a development-only host that mounts `<ng-fixit />` against sample UI.
+## Install
 
 ```bash
-pnpm build
-pnpm start
+pnpm add ng-fixit
 ```
 
-See the workspace README and `projects/ng-fixit-demo/README.md`.
+Add the library stylesheet to the host application's `angular.json` `styles` array:
 
-Domain terms: see workspace `GLOSSARY.md`.
+```json
+"styles": ["src/styles.css", "node_modules/ng-fixit/styles.css"]
+```
+
+Do not rely on a TypeScript `import 'ng-fixit/styles.css'`. It can fail type checking with `TS2882` and may not inject the stylesheet with Angular's application builder.
+
+## Mount ng-fixit
+
+Import `NgFixit` into the application shell:
+
+```ts
+import { Component } from '@angular/core';
+import { NgFixit } from 'ng-fixit';
+
+@Component({
+  imports: [NgFixit],
+  templateUrl: './app.html',
+})
+export class App {}
+```
+
+Mount the component once in the shell template:
+
+```html
+<ng-fixit />
+```
+
+`ng-fixit` defaults to Angular's `isDevMode()`, so production builds leave it disabled.
+
+To explicitly disable it, provide `NG_FIXIT_ENABLED` from the application configuration or a parent injector:
+
+```ts
+import { NG_FIXIT_ENABLED } from 'ng-fixit';
+
+{ provide: NG_FIXIT_ENABLED, useValue: false }
+```
+
+## Use Annotation Mode
+
+1. Run the host application with its usual development server.
+2. Click the **Annotation Mode** button at the bottom right.
+3. Hover the host UI. A highlight marks a selectable **Target**.
+4. Click a Target, type a required note, and press Enter to add the **Annotation**.
+5. Edit, delete, or clear Annotations from the list when needed.
+6. Click **Copy Report** and paste the Markdown into your AI coding agent.
+7. Press Escape or use the toggle to leave Annotation Mode.
+
+Annotations live in memory for the current browser tab. Reloading the page clears them. Copying a Report does not clear the Annotation list.
+
+Library chrome is not selectable as a Target. When Annotation Mode is active, Target clicks are captured so the host UI does not perform its normal click action.
+
+## Public API
+
+- `NgFixit`
+- `NG_FIXIT_ENABLED`
+- `AnnotationMode`
+- `ANNOTATION_MODES`
+
+## Source and license
+
+Source and product terminology: [github.com/driie/ng-fixit-workspace](https://github.com/driie/ng-fixit-workspace).
+
+Licensed under the [MIT License](./LICENSE).
