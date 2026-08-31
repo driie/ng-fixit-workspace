@@ -67,9 +67,6 @@ export class NgFixit {
   protected readonly highlightLocked = computed<boolean>(
     () => this.draft()?.kind === DraftKind.Create,
   );
-  protected readonly highlightBlocked = computed<boolean>(
-    () => this.pointerTarget()?.kind === PointerTargetKind.Blocked,
-  );
   protected readonly hasAnnotations = computed<boolean>(
     () => this.annotationSessionStore.annotations().length > 0,
   );

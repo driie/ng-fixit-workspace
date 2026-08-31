@@ -19,21 +19,15 @@ describe('resolvePointerTarget', () => {
     target.remove();
   });
 
-  it('returns a blocked pointer target for library chrome and descendants', () => {
+  it('ignores library chrome and descendants', () => {
     const chrome = document.createElement('div');
     chrome.setAttribute('data-fixit-chrome', '');
     const nested = document.createElement('button');
     chrome.append(nested);
     document.body.append(chrome);
 
-    expect(resolvePointerTarget(chrome)).toEqual({
-      element: chrome,
-      kind: PointerTargetKind.Blocked,
-    });
-    expect(resolvePointerTarget(nested)).toEqual({
-      element: chrome,
-      kind: PointerTargetKind.Blocked,
-    });
+    expect(resolvePointerTarget(chrome)).toBeNull();
+    expect(resolvePointerTarget(nested)).toBeNull();
 
     chrome.remove();
   });
