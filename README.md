@@ -1,35 +1,32 @@
 # ng-fixit
 
-Development-only Angular library. You pick UI on a running app, write a correction note, and copy a Markdown **Report** to paste into an AI coding agent.
+Development-only Angular library for turning visual UI selections and correction notes into a Markdown **Report** for an AI coding agent.
 
-Mount `<ng-fixit />` once. Enter **Annotation Mode**, click a **Target**, type a note, copy the **Report**.
+## Requirements
 
-Domain terms live in [`GLOSSARY.md`](./GLOSSARY.md).
+- Angular 22
+- `@angular/core` and `@angular/common` `^22.1.0`
 
-|         |                                                             |
-| ------- | ----------------------------------------------------------- |
-| Package | `ng-fixit` on [npm](https://www.npmjs.com/package/ng-fixit) |
-| Stack   | Angular 22                                                  |
-| Prefix  | `fixit` (public root selector: `ng-fixit`)                  |
-| Runtime | Development only (`isDevMode()` unless you override it)     |
-
-## Use it in a host app
-
-Needs Angular 22 (`@angular/core` and `@angular/common` `^22.1.0`).
+## Install
 
 ```bash
 pnpm add ng-fixit
 ```
 
-Add the library stylesheet to the host `angular.json` `styles` array. A TypeScript `import 'ng-fixit/styles.css'` can fail typecheck (`TS2882`) and may not inject CSS with the application builder.
+Add the library stylesheet to the host application's `angular.json` `styles` array:
 
 ```json
 "styles": ["src/styles.css", "node_modules/ng-fixit/styles.css"]
 ```
 
-Import `NgFixit` on the application shell and mount it once:
+Do not rely on a TypeScript `import 'ng-fixit/styles.css'`. It can fail type checking with `TS2882` and may not inject the stylesheet with Angular's application builder.
+
+## Mount ng-fixit
+
+Import `NgFixit` into the application shell:
 
 ```ts
+import { Component } from '@angular/core';
 import { NgFixit } from 'ng-fixit';
 
 @Component({
@@ -39,11 +36,15 @@ import { NgFixit } from 'ng-fixit';
 export class App {}
 ```
 
+Mount the component once in the shell template:
+
 ```html
 <ng-fixit />
 ```
 
-The drop-in root stays inert unless `NG_FIXIT_ENABLED` is true. That token defaults to Angular `isDevMode()`, so production builds do not turn on Annotation Mode. You can force it:
+`ng-fixit` defaults to Angular's `isDevMode()`, so production builds leave it disabled.
+
+To explicitly disable it, provide `NG_FIXIT_ENABLED` from the application configuration or a parent injector:
 
 ```ts
 import { NG_FIXIT_ENABLED } from 'ng-fixit';
@@ -51,76 +52,29 @@ import { NG_FIXIT_ENABLED } from 'ng-fixit';
 { provide: NG_FIXIT_ENABLED, useValue: false }
 ```
 
-### Using Annotation Mode
+## Use Annotation Mode
 
-1. Run the app with `ng serve` (or your usual dev server).
-2. The Annotation Mode button sits at the bottom right. Click it. Escape turns it off.
-3. Hover host UI. A highlight marks a selectable Target. Library chrome is not selectable.
-4. Click a Target, type a required note, press Enter to save the Annotation.
-5. Edit, delete, or clear notes in the list.
-6. Click **Copy Report** and paste the Markdown into your agent. Copy does not clear the list.
+1. Run the host application with its usual development server.
+2. Click the **Annotation Mode** button at the bottom right.
+3. Hover the host UI. A highlight marks a selectable **Target**.
+4. Click a Target, type a required note, and press Enter to add the **Annotation**.
+5. Edit, delete, or clear Annotations from the list when needed.
+6. Click **Copy Report** and paste the Markdown into your AI coding agent.
+7. Press Escape or use the toggle to leave Annotation Mode.
 
-Annotations live in memory for the current tab. A reload clears them.
+Annotations live in memory for the current browser tab. Reloading the page clears them. Copying a Report does not clear the Annotation list.
 
-Public API: `NgFixit`, `NG_FIXIT_ENABLED`, `AnnotationMode`, `ANNOTATION_MODES`.
+Library chrome is not selectable as a Target. When Annotation Mode is active, Target clicks are captured so the host UI does not perform its normal click action.
 
-## Publish a new version
+## Public API
 
-CI publishes `dist/ng-fixit` to npm when you merge to `main` **and** `projects/ng-fixit/package.json` has a version that is not already on npm. Same version, no publish.
+- `NgFixit`
+- `NG_FIXIT_ENABLED`
+- `AnnotationMode`
+- `ANNOTATION_MODES`
 
-1. Bump `version` in `projects/ng-fixit/package.json` (semver).
-2. Merge to `main`.
-3. The **Publish** workflow tests, builds, then runs `.github/scripts/publish-if-new.sh`.
+## Source and license
 
-### One-time npm trusted publisher
+Source and product terminology: [github.com/driie/ng-fixit-workspace](https://github.com/driie/ng-fixit-workspace).
 
-Do this before the first publish (and before merging `0.1.0` to `main`):
-
-1. Create an [npmjs.com](https://www.npmjs.com) account and enable 2FA.
-2. Add a GitHub Actions **pending** trusted publisher for a new package named `ng-fixit`.
-3. GitHub user: `MrPaYu`. Repository: `ng-fixit-workspace`. Workflow filename: `publish.yml`.
-
-Docs: [Trusted publishing for npm](https://docs.npmjs.com/trusted-publishers/). The workflow uses OIDC (`id-token: write`). There is no `NPM_TOKEN` secret.
-
-## Develop this repo
-
-pnpm 11.x and a Node version that Angular 22 accepts.
-
-```bash
-pnpm install
-pnpm build          # output: dist/ng-fixit/
-pnpm start          # demo host at http://localhost:4200/
-pnpm test           # library
-pnpm test:demo      # demo
-```
-
-The demo consumes `dist/ng-fixit/` through tsconfig paths. After library edits, run `pnpm watch` in a second terminal. This demo is for dogfooding, not a production host.
-
-```text
-projects/ng-fixit/                 # publishable library
-  src/
-    lib/
-      shell/ng-fixit/              # public drop-in root
-      components/
-      models/
-      services/
-      utils/
-    public-api.ts
-    styles.css                     # sole stylesheet
-projects/ng-fixit-demo/            # development-only host
-```
-
-Use **pnpm** only. Prefer terms from `GLOSSARY.md`.
-
-## v1 shape
-
-- Drop-in root owns overlay chrome, Annotation Mode, the Annotation list, and copy Report
-- Annotation Mode is an explicit toggle. When off, the host gets normal clicks. When on, Target clicks do not run host UI
-- Target is a single DOM element
-- An Annotation is a Target plus a required note. List CRUD, no reorder
-- Report Markdown includes Locator, note, and Host Component when it can be discovered
-- Out of v1: screenshots, persistence, freeform regions, live agent/MCP bridge
-
-## License
-
-[MIT](./LICENSE)
+Licensed under the [MIT License](./LICENSE).

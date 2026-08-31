@@ -5,12 +5,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MrPaYu/ng-fixit-workspace.git"
+    "url": "git+https://github.com/driie/ng-fixit-workspace.git"
   },
   "bugs": {
-    "url": "https://github.com/MrPaYu/ng-fixit-workspace/issues"
+    "url": "https://github.com/driie/ng-fixit-workspace/issues"
   },
-  "homepage": "https://github.com/MrPaYu/ng-fixit-workspace#readme",
+  "homepage": "https://github.com/driie/ng-fixit-workspace#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
