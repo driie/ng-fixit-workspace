@@ -176,6 +176,16 @@ describe('NgFixit Target hover highlight', () => {
     expect(targetHighlight()).not.toBeNull();
   });
 
+  it('shows the hovered element type at the Target top-left corner', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    movePointerOver(hostButton(hostFixture));
+    await hostFixture.whenStable();
+
+    expect(targetLabel()?.textContent?.trim()).toBe('button');
+  });
+
   it('does not show a Target highlight when Annotation Mode is off', async () => {
     movePointerOver(hostButton(hostFixture));
     await hostFixture.whenStable();
@@ -295,6 +305,20 @@ describe('NgFixit create Annotation', () => {
     await hostFixture.whenStable();
 
     expect(noteEntry()).not.toBeNull();
+  });
+
+  it('places note entry next to the selected Target', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    const button = hostButton(hostFixture);
+    mockElementRect(button, { x: 24, y: 40, width: 100, height: 40 });
+    clickTarget(button);
+    await hostFixture.whenStable();
+
+    expect(noteEntry()?.style.top).toBe('88px');
+    expect(noteEntry()?.style.left).toBe('24px');
+    expect(noteEntry()?.getAttribute('data-placement')).toBe('below');
   });
 
   it('adds a committed Annotation to the working list with a note preview', async () => {
@@ -824,6 +848,10 @@ const movePointerOver = (element: Element): void => {
 
 const targetHighlight = (): HTMLElement | null => {
   return document.querySelector('[data-testid="fixit-target-highlight"]');
+};
+
+const targetLabel = (): HTMLElement | null => {
+  return document.querySelector('[data-testid="fixit-target-label"]');
 };
 
 const highlightBox = (): {

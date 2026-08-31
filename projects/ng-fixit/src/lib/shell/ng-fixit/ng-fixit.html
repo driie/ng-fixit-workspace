@@ -39,9 +39,19 @@
   [style.left]="box.left"
   [style.width]="box.width"
   [style.height]="box.height"
-></div>
-} @if (draft()) {
-<fixit-note-entry />
-} @if (annotationModePressed() && hasAnnotations()) {
+>
+  @if (targetLabel(); as label) {
+  <span class="fixit-target-label" data-testid="fixit-target-label">{{ label }}</span>
+  }
+</div>
+} @if (draft()) { @if (noteEntryPosition(); as position) {
+<fixit-note-entry
+  [attr.data-placement]="position.placement"
+  [style.top]="position.top"
+  [style.left]="position.left"
+/>
+} @else {
+<fixit-note-entry class="fixit-note-entry-default" />
+} } @if (annotationModePressed() && hasAnnotations()) {
 <fixit-annotation-list />
 } }

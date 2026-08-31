@@ -33,18 +33,13 @@ export class NoteEntry {
     () => this.annotationSessionStore.draft()?.note ?? '',
   );
 
-  constructor() {
-    afterNextRender(() => {
-      this.noteInput()?.nativeElement.focus();
-    });
-  }
-
   updateDraftNote(event: Event): void {
     const target = event.target;
     if (!(target instanceof HTMLTextAreaElement)) {
       return;
     }
 
+    this.resizeNoteInput(target);
     this.annotationSessionStore.updateDraftNote(target.value);
   }
 
@@ -63,5 +58,22 @@ export class NoteEntry {
 
   cancelAnnotation(): void {
     this.annotationSessionStore.cancelDraft();
+  }
+
+  private resizeNoteInput(input: HTMLTextAreaElement): void {
+    input.style.height = 'auto';
+    input.style.height = `${input.scrollHeight}px`;
+  }
+
+  constructor() {
+    afterNextRender(() => {
+      const input = this.noteInput()?.nativeElement;
+      if (!input) {
+        return;
+      }
+
+      this.resizeNoteInput(input);
+      input.focus();
+    });
   }
 }

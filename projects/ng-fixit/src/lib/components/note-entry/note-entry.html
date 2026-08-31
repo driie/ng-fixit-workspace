@@ -6,6 +6,8 @@
   id="fixit-note-entry-input"
   class="fixit-note-entry-input"
   data-testid="fixit-note-entry-input"
+  rows="1"
+  placeholder="Describe the correction"
   [value]="draftNote()"
   (input)="updateDraftNote($event)"
   (keydown)="commitIfEnter($event)"
@@ -15,16 +17,22 @@
     type="button"
     class="fixit-note-entry-commit"
     data-testid="fixit-note-entry-commit"
+    aria-label="Save note"
     (click)="commitAnnotation()"
   >
-    Commit
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="m5 12 4 4L19 6" />
+    </svg>
   </button>
   <button
     type="button"
     class="fixit-note-entry-cancel"
     data-testid="fixit-note-entry-cancel"
+    aria-label="Cancel note"
     (click)="cancelAnnotation()"
   >
-    Cancel
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
   </button>
 </div>

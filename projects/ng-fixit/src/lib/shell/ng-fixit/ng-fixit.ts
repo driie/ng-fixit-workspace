@@ -16,6 +16,12 @@ import { CopyToast } from '../../components/copy-toast/copy-toast';
 import { NoteEntry } from '../../components/note-entry/note-entry';
 import { DraftKind } from '../../models/annotation';
 import { AnnotationMode } from '../../models/annotation-mode';
+import {
+  NoteEntryPosition,
+  PointerTarget,
+  PointerTargetKind,
+  TargetHighlightBox,
+} from '../../models/target-overlay';
 import { AnnotationSessionStore } from '../../services/annotation-session-store';
 import { writeClipboardText } from '../../utils/clipboard';
 import { discoverHostComponent } from '../../utils/host-component';
@@ -23,10 +29,9 @@ import { captureLocator } from '../../utils/locator';
 import { buildReportMarkdown } from '../../utils/report-builder';
 import {
   highlightBoxFromElement,
-  PointerTarget,
-  PointerTargetKind,
+  noteEntryPositionFromElement,
   resolvePointerTarget,
-  TargetHighlightBox,
+  targetLabelFromElement,
 } from '../../utils/target-highlight';
 
 export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', {
@@ -83,6 +88,29 @@ export class NgFixit {
     }
 
     return highlightBoxFromElement(target);
+  });
+  protected readonly targetLabel = computed<string | null>(() => {
+    if (!this.annotationModePressed()) {
+      return null;
+    }
+
+    const target = this.pointerTarget()?.element;
+    return target ? targetLabelFromElement(target) : null;
+  });
+  protected readonly noteEntryPosition = computed<NoteEntryPosition | null>(() => {
+    this.highlightLayoutEpoch();
+
+    if (this.draft()?.kind !== DraftKind.Create) {
+      return null;
+    }
+
+    const target = this.pointerTarget()?.element;
+    const view = this.document.defaultView;
+    if (!target || !view) {
+      return null;
+    }
+
+    return noteEntryPositionFromElement(target, view.innerWidth, view.innerHeight);
   });
 
   toggleAnnotationMode(): void {
