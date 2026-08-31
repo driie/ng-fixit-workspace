@@ -213,7 +213,7 @@ describe('NgFixit Target hover highlight', () => {
     });
   });
 
-  it('shows a blocked highlight when the pointer is over library chrome', async () => {
+  it('does not highlight library chrome as a Target', async () => {
     annotationModeToggle(hostFixture).click();
     await hostFixture.whenStable();
 
@@ -221,15 +221,10 @@ describe('NgFixit Target hover highlight', () => {
     await hostFixture.whenStable();
 
     expect(targetHighlight()).not.toBeNull();
-    expect(targetHighlight()?.classList.contains('fixit-target-highlight-blocked')).toBe(false);
-    expect(blockedHint()).toBeNull();
-
     movePointerOver(annotationModeToggle(hostFixture));
     await hostFixture.whenStable();
 
-    expect(targetHighlight()).not.toBeNull();
-    expect(targetHighlight()?.classList.contains('fixit-target-highlight-blocked')).toBe(true);
-    expect(blockedHint()?.textContent?.trim()).toBe('Cannot add a note here');
+    expect(targetHighlight()).toBeNull();
   });
 
   it('does not start an Annotation from a blocked library chrome click', async () => {
@@ -494,6 +489,25 @@ describe('NgFixit copy Report', () => {
     await hostFixture.whenStable();
 
     expect(copyReportButton(hostFixture)).toBeTruthy();
+  });
+
+  it('keeps the Annotation Mode toggle to the right of Copy Report', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    expect(copyReportButton(hostFixture).nextElementSibling).toBe(
+      annotationModeToggle(hostFixture),
+    );
+  });
+
+  it('shows an icon in the Copy Report control', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    const icon = copyReportButton(hostFixture).querySelector('svg');
+
+    expect(icon).not.toBeNull();
+    expect(icon?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('copies Report Markdown for the current Annotations to the clipboard', async () => {
@@ -810,10 +824,6 @@ const movePointerOver = (element: Element): void => {
 
 const targetHighlight = (): HTMLElement | null => {
   return document.querySelector('[data-testid="fixit-target-highlight"]');
-};
-
-const blockedHint = (): HTMLElement | null => {
-  return document.querySelector('[data-testid="fixit-blocked-hint"]');
 };
 
 const highlightBox = (): {

@@ -2,7 +2,6 @@ import { BoundingBox } from '../models/locator';
 
 export const PointerTargetKind = {
   Target: 'target',
-  Blocked: 'blocked',
 } as const;
 
 export type PointerTargetKind = (typeof PointerTargetKind)[keyof typeof PointerTargetKind];
@@ -25,10 +24,7 @@ export const resolvePointerTarget = (eventTarget: EventTarget | null): PointerTa
   }
 
   if (isLibraryChrome(eventTarget)) {
-    return {
-      element: eventTarget.closest('[data-fixit-chrome]') ?? eventTarget,
-      kind: PointerTargetKind.Blocked,
-    };
+    return null;
   }
 
   return {
