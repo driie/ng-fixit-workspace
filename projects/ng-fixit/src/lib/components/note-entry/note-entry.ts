@@ -21,7 +21,6 @@ import { AnnotationSessionStore } from '../../services/annotation-session-store'
     'aria-labelledby': 'fixit-note-entry-label',
     'data-fixit-chrome': '',
     'data-testid': 'fixit-note-entry',
-    '(document:keydown.escape)': 'cancelAnnotation()',
   },
 })
 export class NoteEntry {

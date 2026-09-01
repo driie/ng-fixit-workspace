@@ -1,28 +1,18 @@
 <ul class="fixit-annotation-list-items">
   @for (annotation of annotations(); track annotation.id) {
-  <li class="fixit-annotation-list-item" data-testid="fixit-annotation-list-item">
-    <span
-      class="fixit-annotation-list-note"
-      data-testid="fixit-annotation-list-note"
-      [title]="annotation.note"
-      >{{ annotation.note }}</span
-    >
-    <span
-      class="fixit-annotation-list-locator"
-      data-testid="fixit-annotation-list-locator"
-      [title]="annotation.locator.cssPath"
-      >{{ annotation.locator.cssPath }}</span
-    >
-    <div class="fixit-annotation-list-item-actions">
-      <button
-        type="button"
-        class="fixit-annotation-list-edit"
-        data-testid="fixit-annotation-list-edit"
-        [attr.aria-label]="'Edit note: ' + annotation.note"
-        (click)="beginEdit(annotation.id)"
+  <li
+    class="fixit-annotation-list-item"
+    data-testid="fixit-annotation-list-item"
+    (pointerenter)="targetHovered.emit(annotation.locator.cssPath)"
+    (pointerleave)="targetHovered.emit(null)"
+  >
+    <div class="fixit-annotation-list-header">
+      <span
+        class="fixit-annotation-list-locator"
+        data-testid="fixit-annotation-list-locator"
+        [title]="annotation.locator.cssPath"
+        >{{ targetSelectors()[annotation.id] }}</span
       >
-        Edit
-      </button>
       <button
         type="button"
         class="fixit-annotation-list-delete"
@@ -30,9 +20,25 @@
         [attr.aria-label]="'Delete annotation: ' + annotation.note"
         (click)="deleteAnnotation(annotation.id)"
       >
-        Delete
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18" />
+          <path d="M8 6V4h8v2" />
+          <path d="M19 6l-1 14H6L5 6" />
+          <path d="M10 11v5" />
+          <path d="M14 11v5" />
+        </svg>
       </button>
     </div>
+    <button
+      type="button"
+      class="fixit-annotation-list-note"
+      data-testid="fixit-annotation-list-note"
+      [attr.aria-label]="'Edit note: ' + annotation.note"
+      [title]="annotation.note"
+      (click)="beginEdit(annotation.id)"
+    >
+      {{ annotation.note }}
+    </button>
   </li>
   }
 </ul>

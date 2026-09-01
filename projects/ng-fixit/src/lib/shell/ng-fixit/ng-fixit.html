@@ -53,5 +53,5 @@
 } @else {
 <fixit-note-entry class="fixit-note-entry-default" />
 } } @if (annotationModePressed() && hasAnnotations()) {
-<fixit-annotation-list />
+<fixit-annotation-list (targetHovered)="highlightAnnotationTarget($event)" />
 } }

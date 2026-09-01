@@ -49,7 +49,7 @@ export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', 
     class: 'fixit-root',
     '[attr.data-fixit-annotation-mode]': 'annotationMode()',
     '(document:pointermove)': 'trackPointerTarget($event)',
-    '(document:keydown.escape)': 'leaveAnnotationMode($event)',
+    '(document:keydown.escape)': 'cancelDraftOrLeaveAnnotationMode($event)',
     '(window:resize)': 'refreshTargetHighlight()',
   },
 })
@@ -60,6 +60,7 @@ export class NgFixit {
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly pointerTarget = signal<PointerTarget | null>(null);
+  private readonly hoveredAnnotationTarget = signal<Element | null>(null);
   private readonly highlightLayoutEpoch = signal<number>(0);
   private readonly copyToast = viewChild(CopyToast);
 
@@ -82,7 +83,7 @@ export class NgFixit {
       return null;
     }
 
-    const target = this.pointerTarget()?.element;
+    const target = this.hoveredAnnotationTarget() ?? this.pointerTarget()?.element;
     if (!target) {
       return null;
     }
@@ -94,7 +95,7 @@ export class NgFixit {
       return null;
     }
 
-    const target = this.pointerTarget()?.element;
+    const target = this.hoveredAnnotationTarget() ?? this.pointerTarget()?.element;
     return target ? targetLabelFromElement(target) : null;
   });
   protected readonly noteEntryPosition = computed<NoteEntryPosition | null>(() => {
@@ -126,6 +127,17 @@ export class NgFixit {
     this.annotationSessionStore.enterAnnotationMode();
   }
 
+  cancelDraftOrLeaveAnnotationMode(event: Event): void {
+    if (this.draft()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.annotationSessionStore.cancelDraft();
+      return;
+    }
+
+    this.leaveAnnotationMode(event);
+  }
+
   leaveAnnotationMode(event?: Event): void {
     if (!this.libraryEnabled || this.annotationMode() !== AnnotationMode.On) {
       return;
@@ -145,6 +157,10 @@ export class NgFixit {
     const markdown = buildReportMarkdown(this.annotationSessionStore.annotations());
     writeClipboardText(this.document.defaultView, markdown);
     this.copyToast()?.show();
+  }
+
+  highlightAnnotationTarget(cssPath: string | null): void {
+    this.hoveredAnnotationTarget.set(cssPath ? this.document.querySelector(cssPath) : null);
   }
 
   trackPointerTarget(event: PointerEvent): void {

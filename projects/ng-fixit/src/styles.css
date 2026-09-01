@@ -189,10 +189,9 @@
   flex: 1 1 auto;
   min-width: 0;
   min-height: 2.125rem;
-  max-height: min(18rem, calc(100vh - 4rem));
   margin: 0;
   padding: 0.5rem 0.625rem;
-  overflow-y: auto;
+  overflow-y: hidden;
   box-sizing: border-box;
   border: 1px solid var(--fixit-color-border-muted);
   border-radius: 0.5rem;
@@ -296,10 +295,32 @@
   flex-direction: column;
   gap: 0.375rem;
   min-height: 0;
-  margin: 0;
-  padding: 0;
+  margin: -0.25rem;
+  padding: 0.25rem;
   overflow: auto;
+  scrollbar-color: var(--fixit-color-border-subtle) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
   list-style: none;
+}
+
+.fixit-annotation-list-items::-webkit-scrollbar {
+  width: 0.625rem;
+}
+
+.fixit-annotation-list-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fixit-annotation-list-items::-webkit-scrollbar-thumb {
+  border: 0.1875rem solid transparent;
+  border-radius: 999px;
+  background: var(--fixit-color-border-subtle);
+  background-clip: padding-box;
+}
+
+.fixit-annotation-list-items::-webkit-scrollbar-thumb:hover {
+  background-color: var(--fixit-color-text-faint);
 }
 
 .fixit-annotation-list-item {
@@ -315,9 +336,25 @@
   font: inherit;
   font-size: 0.8125rem;
   line-height: 1.35;
+  transform-origin: center;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
-.fixit-annotation-list-note,
+.fixit-annotation-list-item:hover {
+  border-color: var(--fixit-color-border-subtle);
+  transform: scale(1.02);
+}
+
+.fixit-annotation-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 .fixit-annotation-list-locator {
   min-width: 0;
   overflow: hidden;
@@ -326,22 +363,37 @@
 }
 
 .fixit-annotation-list-note {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
   color: var(--fixit-color-text);
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .fixit-annotation-list-locator {
+  padding: 0.125rem 0.3rem;
   color: var(--fixit-color-text-faint);
+  border-radius: 0.25rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
-.fixit-annotation-list-item-actions {
-  display: flex;
-  gap: 0.375rem;
-  margin-top: 0.125rem;
+.fixit-annotation-list-item:hover .fixit-annotation-list-locator {
+  background: var(--fixit-color-accent);
+  color: var(--fixit-color-text);
 }
 
-.fixit-annotation-list-edit,
 .fixit-annotation-list-delete,
 .fixit-annotation-list-clear {
   margin: 0;
@@ -356,18 +408,38 @@
   cursor: pointer;
 }
 
-.fixit-annotation-list-edit:hover,
 .fixit-annotation-list-delete:hover,
 .fixit-annotation-list-clear:hover {
   color: var(--fixit-color-text);
   border-color: var(--fixit-color-border-muted);
 }
 
-.fixit-annotation-list-edit:focus-visible,
+.fixit-annotation-list-note:focus-visible,
 .fixit-annotation-list-delete:focus-visible,
 .fixit-annotation-list-clear:focus-visible {
   outline: 2px solid var(--fixit-color-focus);
   outline-offset: 2px;
+}
+
+.fixit-annotation-list-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+}
+
+.fixit-annotation-list-delete svg {
+  display: block;
+  width: 0.875rem;
+  height: 0.875rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .fixit-annotation-list-clear {
@@ -441,19 +513,19 @@
   outline-offset: 2px;
 }
 
-html:has([data-fixit-annotation-mode='on']) {
+html:has([data-fixit-annotation-mode='on']),
+html:has([data-fixit-annotation-mode='on']) body *:not(.fixit-root):not(.fixit-root *) {
   cursor: crosshair;
 }
 
-html:has([data-fixit-annotation-mode='on']) .fixit-chrome,
-html:has([data-fixit-annotation-mode='on']) .fixit-note-entry,
-html:has([data-fixit-annotation-mode='on']) .fixit-annotation-list,
-html:has([data-fixit-annotation-mode='on']) .fixit-copy-toast {
+html:has([data-fixit-annotation-mode='on']) .fixit-root {
   cursor: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fixit-target-highlight,
+  .fixit-annotation-list-item,
+  .fixit-annotation-list-locator,
   .fixit-copy-toast:not([hidden]) {
     transition: none;
   }

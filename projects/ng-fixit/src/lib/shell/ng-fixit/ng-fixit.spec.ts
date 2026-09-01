@@ -336,6 +336,45 @@ describe('NgFixit create Annotation', () => {
     expect(noteEntry()).toBeNull();
   });
 
+  it('shows only the selected Target selector in the Annotation list', async () => {
+    annotationModeToggle(hostFixture).click();
+    await hostFixture.whenStable();
+
+    clickTarget(hostButton(hostFixture));
+    await hostFixture.whenStable();
+    setNoteEntryValue('Fix the button label');
+    commitNoteEntry().click();
+    await hostFixture.whenStable();
+
+    const locator = document.querySelector(
+      '[data-testid="fixit-annotation-list-locator"]',
+    ) as HTMLElement;
+
+    expect(locator.textContent?.trim()).toBe('button');
+    expect(locator.title).toMatch(/ > button$/);
+  });
+
+  it('highlights an Annotation Target while its note is hovered', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Fix the button label');
+
+    const annotationItem = annotationListItems()[0];
+    if (!annotationItem) {
+      throw new Error('Expected Annotation list item');
+    }
+
+    movePointerOver(annotationItem);
+    annotationItem.dispatchEvent(new Event('pointerenter'));
+    await hostFixture.whenStable();
+
+    expect(targetHighlight()).not.toBeNull();
+    expect(targetLabel()?.textContent?.trim()).toBe('button');
+
+    annotationItem.dispatchEvent(new Event('pointerleave'));
+    await hostFixture.whenStable();
+
+    expect(targetHighlight()).toBeNull();
+  });
+
   it('creates no Annotation when note entry is canceled', async () => {
     annotationModeToggle(hostFixture).click();
     await hostFixture.whenStable();
@@ -439,7 +478,7 @@ describe('NgFixit create Annotation', () => {
     });
   });
 
-  it('leaves Annotation Mode and clears the draft when Escape is pressed', async () => {
+  it('discards the draft and keeps Annotation Mode on when Escape is pressed', async () => {
     annotationModeToggle(hostFixture).click();
     await hostFixture.whenStable();
 
@@ -452,7 +491,7 @@ describe('NgFixit create Annotation', () => {
 
     expect(annotationListItems()).toEqual([]);
     expect(noteEntry()).toBeNull();
-    expect(annotationModeToggle(hostFixture).getAttribute('aria-pressed')).toBe('false');
+    expect(annotationModeToggle(hostFixture).getAttribute('aria-pressed')).toBe('true');
   });
 
   it('does not start a second create while note entry is open', async () => {
@@ -718,12 +757,14 @@ describe('NgFixit Annotation list management', () => {
   it('updates an Annotation note preview after edit is committed', async () => {
     await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
 
-    expect(editAnnotationButtons()[0]?.getAttribute('aria-label')).toBe('Edit note: Original note');
+    expect(annotationListNoteButtons()[0]?.getAttribute('aria-label')).toBe(
+      'Edit note: Original note',
+    );
     expect(deleteAnnotationButtons()[0]?.getAttribute('aria-label')).toBe(
       'Delete annotation: Original note',
     );
 
-    editAnnotationButtons()[0]?.click();
+    annotationListNoteButtons()[0]?.click();
     await hostFixture.whenStable();
 
     expect(noteEntry()).not.toBeNull();
@@ -740,7 +781,7 @@ describe('NgFixit Annotation list management', () => {
   it('keeps the original note when edit is canceled', async () => {
     await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
 
-    editAnnotationButtons()[0]?.click();
+    annotationListNoteButtons()[0]?.click();
     await hostFixture.whenStable();
     setNoteEntryValue('Will abandon');
     cancelNoteEntry().click();
@@ -753,7 +794,7 @@ describe('NgFixit Annotation list management', () => {
   it('rejects an empty edit without changing the Annotation', async () => {
     await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
 
-    editAnnotationButtons()[0]?.click();
+    annotationListNoteButtons()[0]?.click();
     await hostFixture.whenStable();
     setNoteEntryValue('   ');
     commitNoteEntry().click();
@@ -777,7 +818,7 @@ describe('NgFixit Annotation list management', () => {
       'Second note',
     );
 
-    editAnnotationButtons()[0]?.click();
+    annotationListNoteButtons()[0]?.click();
     await hostFixture.whenStable();
     setNoteEntryValue('Refined first note');
     commitNoteEntry().click();
@@ -932,8 +973,8 @@ const annotationListLocators = (): string[] => {
   );
 };
 
-const editAnnotationButtons = (): HTMLButtonElement[] => {
-  return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-edit"]'));
+const annotationListNoteButtons = (): HTMLButtonElement[] => {
+  return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-note"]'));
 };
 
 const deleteAnnotationButtons = (): HTMLButtonElement[] => {
