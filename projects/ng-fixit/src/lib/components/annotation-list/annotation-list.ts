@@ -25,6 +25,7 @@ export class AnnotationList {
       ]),
     ),
   );
+  readonly copyReportRequested = output<void>();
   readonly targetHovered = output<string | null>();
 
   beginEdit(id: string): void {

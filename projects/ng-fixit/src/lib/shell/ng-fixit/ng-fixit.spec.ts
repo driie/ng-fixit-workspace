@@ -238,10 +238,9 @@ describe('NgFixit Target hover highlight', () => {
   });
 
   it('does not start an Annotation from a blocked library chrome click', async () => {
-    annotationModeToggle(hostFixture).click();
-    await hostFixture.whenStable();
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Keep library chrome blocked');
 
-    movePointerOver(annotationModeToggle(hostFixture));
+    movePointerOver(copyReportButton(hostFixture));
     await hostFixture.whenStable();
     clickTarget(copyReportButton(hostFixture));
     await hostFixture.whenStable();
@@ -545,27 +544,24 @@ describe('NgFixit copy Report', () => {
     await hostFixture.whenStable();
   });
 
-  it('shows a Copy Report control when Annotation Mode is on', async () => {
+  it('shows a Copy Report control when the Annotation list is available', async () => {
     expect(copyReportButton(hostFixture)).toBeNull();
 
-    annotationModeToggle(hostFixture).click();
-    await hostFixture.whenStable();
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Show the Report control');
 
     expect(copyReportButton(hostFixture)).toBeTruthy();
   });
 
-  it('keeps the Annotation Mode toggle to the right of Copy Report', async () => {
-    annotationModeToggle(hostFixture).click();
-    await hostFixture.whenStable();
+  it('places Copy Report inside the Annotation list', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Place the Report control');
 
-    expect(copyReportButton(hostFixture).nextElementSibling).toBe(
-      annotationModeToggle(hostFixture),
-    );
+    expect(
+      copyReportButton(hostFixture).closest('[data-testid="fixit-annotation-list"]'),
+    ).not.toBeNull();
   });
 
   it('shows an icon in the Copy Report control', async () => {
-    annotationModeToggle(hostFixture).click();
-    await hostFixture.whenStable();
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Show the Report icon');
 
     const icon = copyReportButton(hostFixture).querySelector('svg');
 
