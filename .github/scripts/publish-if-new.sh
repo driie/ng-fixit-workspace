@@ -18,4 +18,4 @@ if npm view "${name}@${version}" version >/dev/null 2>&1; then
 fi
 
 echo "Publishing ${name}@${version}"
-npm publish "${package_dir}" --access public
+npm publish "./${package_dir}" --access public
