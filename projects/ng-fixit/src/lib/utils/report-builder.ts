@@ -5,10 +5,6 @@ const REPORT_INTRODUCTION =
   'The following findings describe requested UI changes. Review each Annotation, use its Target details to locate the relevant interface and code, and implement the requested changes.';
 
 export const buildReportMarkdown = (annotations: readonly Annotation[]): string => {
-  if (annotations.length === 0) {
-    return `${REPORT_INTRODUCTION}\n`;
-  }
-
   const sections = annotations.map((annotation, index) => {
     return [
       `## Annotation ${index + 1}`,
@@ -20,7 +16,7 @@ export const buildReportMarkdown = (annotations: readonly Annotation[]): string 
     ].join('\n');
   });
 
-  return `${REPORT_INTRODUCTION}\n\n${sections.join('\n\n')}\n`;
+  return `${[REPORT_INTRODUCTION, ...sections].join('\n\n')}\n`;
 };
 
 const formatLocatorLines = (locator: Locator): string[] => {

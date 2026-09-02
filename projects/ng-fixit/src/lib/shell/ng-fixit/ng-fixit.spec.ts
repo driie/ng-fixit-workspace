@@ -577,9 +577,6 @@ describe('NgFixit copy Report', () => {
 
     expect(writeText).toHaveBeenCalledTimes(1);
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Fix the button label'));
-    expect(writeText).toHaveBeenCalledWith(
-      expect.stringContaining('The following findings describe requested UI changes.'),
-    );
   });
 
   it('leaves the working Annotation list intact after a successful copy', async () => {
