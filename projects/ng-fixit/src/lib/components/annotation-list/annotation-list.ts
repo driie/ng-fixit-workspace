@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 
-import { NoteEntry } from '../note-entry/note-entry';
 import { DraftKind } from '../../models/annotation';
 import { AnnotationSessionStore } from '../../services/annotation-session-store';
 import { targetSelectorFromCssPath } from '../../utils/target-selector';
+import { NoteEntry } from '../note-entry/note-entry';
 
 @Component({
   selector: 'fixit-annotation-list',

@@ -16,8 +16,7 @@ import { AnnotationSessionStore } from '../../services/annotation-session-store'
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'fixit-note-entry',
-    role: 'dialog',
-    'aria-modal': 'true',
+    role: 'group',
     'aria-labelledby': 'fixit-note-entry-label',
     'data-fixit-chrome': '',
     'data-testid': 'fixit-note-entry',

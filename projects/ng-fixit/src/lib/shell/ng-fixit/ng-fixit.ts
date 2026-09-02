@@ -70,7 +70,7 @@ export class NgFixit {
   protected readonly annotationModePressed = computed<boolean>(
     () => this.annotationMode() === AnnotationMode.On,
   );
-  protected readonly highlightLocked = computed<boolean>(
+  protected readonly createDraftActive = computed<boolean>(
     () => this.draft()?.kind === DraftKind.Create,
   );
   protected readonly hasAnnotations = computed<boolean>(
@@ -100,10 +100,6 @@ export class NgFixit {
   });
   protected readonly noteEntryPosition = computed<NoteEntryPosition | null>(() => {
     this.highlightLayoutEpoch();
-
-    if (this.draft()?.kind !== DraftKind.Create) {
-      return null;
-    }
 
     const target = this.pointerTarget()?.element;
     const view = this.document.defaultView;
@@ -229,6 +225,4 @@ export class NgFixit {
       this.document.removeEventListener('click', selectTarget, true);
     });
   }
-
-  protected readonly DraftKind = DraftKind;
 }
