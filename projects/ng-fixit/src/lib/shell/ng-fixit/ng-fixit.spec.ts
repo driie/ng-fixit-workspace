@@ -774,6 +774,17 @@ describe('NgFixit Annotation list management', () => {
     expect(noteEntry()).toBeNull();
   });
 
+  it('starts editing when the Annotation card is clicked', async () => {
+    await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
+
+    annotationListItems()[0]?.click();
+    await hostFixture.whenStable();
+
+    expect(noteEntry()).not.toBeNull();
+    expect(noteEntryInput().value).toBe('Original note');
+    expect(noteEntry()?.closest('[data-testid="fixit-annotation-list-item"]')).not.toBeNull();
+  });
+
   it('keeps the original note when edit is canceled', async () => {
     await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
 
@@ -796,8 +807,12 @@ describe('NgFixit Annotation list management', () => {
     commitNoteEntry().click();
     await hostFixture.whenStable();
 
-    expect(annotationListNotes()).toEqual(['Original note']);
     expect(noteEntry()).not.toBeNull();
+
+    cancelNoteEntry().click();
+    await hostFixture.whenStable();
+
+    expect(annotationListNotes()).toEqual(['Original note']);
   });
 
   it('copies a Report after edit and delete without clearing remaining Annotations', async () => {

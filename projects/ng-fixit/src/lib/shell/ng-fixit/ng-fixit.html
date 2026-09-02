@@ -30,7 +30,7 @@
   <span class="fixit-target-label" data-testid="fixit-target-label">{{ label }}</span>
   }
 </div>
-} @if (draft()) { @if (noteEntryPosition(); as position) {
+} @if (draft()?.kind === DraftKind.Create) { @if (noteEntryPosition(); as position) {
 <fixit-note-entry
   [attr.data-placement]="position.placement"
   [style.top]="position.top"

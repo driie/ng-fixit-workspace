@@ -25,6 +25,8 @@
     <li
       class="fixit-annotation-list-item"
       data-testid="fixit-annotation-list-item"
+      [class.fixit-annotation-list-item-editing]="editingId() === annotation.id"
+      (click)="beginEdit(annotation.id)"
       (pointerenter)="targetHovered.emit(annotation.locator.cssPath)"
       (pointerleave)="targetHovered.emit(null)"
     >
@@ -40,7 +42,7 @@
           class="fixit-annotation-list-delete"
           data-testid="fixit-annotation-list-delete"
           [attr.aria-label]="'Delete annotation: ' + annotation.note"
-          (click)="deleteAnnotation(annotation.id)"
+          (click)="$event.stopPropagation(); deleteAnnotation(annotation.id)"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 6h18" />
@@ -51,16 +53,19 @@
           </svg>
         </button>
       </div>
+      @if (editingId() === annotation.id) {
+      <fixit-note-entry class="fixit-note-entry-inline" (click)="$event.stopPropagation()" />
+      } @else {
       <button
         type="button"
         class="fixit-annotation-list-note"
         data-testid="fixit-annotation-list-note"
         [attr.aria-label]="'Edit note: ' + annotation.note"
         [title]="annotation.note"
-        (click)="beginEdit(annotation.id)"
       >
         {{ annotation.note }}
       </button>
+      }
     </li>
     }
   </ul>

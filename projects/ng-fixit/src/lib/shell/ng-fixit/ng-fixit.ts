@@ -229,4 +229,6 @@ export class NgFixit {
       this.document.removeEventListener('click', selectTarget, true);
     });
   }
+
+  protected readonly DraftKind = DraftKind;
 }
