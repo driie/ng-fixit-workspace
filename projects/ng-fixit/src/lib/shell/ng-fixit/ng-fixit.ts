@@ -16,6 +16,12 @@ import { CopyToast } from '../../components/copy-toast/copy-toast';
 import { NoteEntry } from '../../components/note-entry/note-entry';
 import { DraftKind } from '../../models/annotation';
 import { AnnotationMode } from '../../models/annotation-mode';
+import {
+  NoteEntryPosition,
+  PointerTarget,
+  PointerTargetKind,
+  TargetHighlightBox,
+} from '../../models/target-overlay';
 import { AnnotationSessionStore } from '../../services/annotation-session-store';
 import { writeClipboardText } from '../../utils/clipboard';
 import { discoverHostComponent } from '../../utils/host-component';
@@ -23,10 +29,9 @@ import { captureLocator } from '../../utils/locator';
 import { buildReportMarkdown } from '../../utils/report-builder';
 import {
   highlightBoxFromElement,
-  PointerTarget,
-  PointerTargetKind,
+  noteEntryPositionFromElement,
   resolvePointerTarget,
-  TargetHighlightBox,
+  targetLabelFromElement,
 } from '../../utils/target-highlight';
 
 export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', {
@@ -44,7 +49,7 @@ export const NG_FIXIT_ENABLED = new InjectionToken<boolean>('NG_FIXIT_ENABLED', 
     class: 'fixit-root',
     '[attr.data-fixit-annotation-mode]': 'annotationMode()',
     '(document:pointermove)': 'trackPointerTarget($event)',
-    '(document:keydown.escape)': 'leaveAnnotationMode($event)',
+    '(document:keydown.escape)': 'cancelDraftOrLeaveAnnotationMode($event)',
     '(window:resize)': 'refreshTargetHighlight()',
   },
 })
@@ -55,6 +60,7 @@ export class NgFixit {
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly pointerTarget = signal<PointerTarget | null>(null);
+  private readonly hoveredAnnotationTarget = signal<Element | null>(null);
   private readonly highlightLayoutEpoch = signal<number>(0);
   private readonly copyToast = viewChild(CopyToast);
 
@@ -77,12 +83,35 @@ export class NgFixit {
       return null;
     }
 
-    const target = this.pointerTarget()?.element;
+    const target = this.hoveredAnnotationTarget() ?? this.pointerTarget()?.element;
     if (!target) {
       return null;
     }
 
     return highlightBoxFromElement(target);
+  });
+  protected readonly targetLabel = computed<string | null>(() => {
+    if (!this.annotationModePressed()) {
+      return null;
+    }
+
+    const target = this.hoveredAnnotationTarget() ?? this.pointerTarget()?.element;
+    return target ? targetLabelFromElement(target) : null;
+  });
+  protected readonly noteEntryPosition = computed<NoteEntryPosition | null>(() => {
+    this.highlightLayoutEpoch();
+
+    if (this.draft()?.kind !== DraftKind.Create) {
+      return null;
+    }
+
+    const target = this.pointerTarget()?.element;
+    const view = this.document.defaultView;
+    if (!target || !view) {
+      return null;
+    }
+
+    return noteEntryPositionFromElement(target, view.innerWidth, view.innerHeight);
   });
 
   toggleAnnotationMode(): void {
@@ -96,6 +125,17 @@ export class NgFixit {
     }
 
     this.annotationSessionStore.enterAnnotationMode();
+  }
+
+  cancelDraftOrLeaveAnnotationMode(event: Event): void {
+    if (this.draft()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.annotationSessionStore.cancelDraft();
+      return;
+    }
+
+    this.leaveAnnotationMode(event);
   }
 
   leaveAnnotationMode(event?: Event): void {
@@ -117,6 +157,10 @@ export class NgFixit {
     const markdown = buildReportMarkdown(this.annotationSessionStore.annotations());
     writeClipboardText(this.document.defaultView, markdown);
     this.copyToast()?.show();
+  }
+
+  highlightAnnotationTarget(cssPath: string | null): void {
+    this.hoveredAnnotationTarget.set(cssPath ? this.document.querySelector(cssPath) : null);
   }
 
   trackPointerTarget(event: PointerEvent): void {
