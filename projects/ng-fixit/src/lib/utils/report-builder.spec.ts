@@ -30,7 +30,9 @@ const annotationFixture = (
 
 describe('buildReportMarkdown', () => {
   it('returns a stable empty Report when there are no Annotations', () => {
-    expect(buildReportMarkdown([])).toBe('# ng-fixit Report\n');
+    expect(buildReportMarkdown([])).toBe(
+      'The following findings describe requested UI changes. Review each Annotation, use its Target details to locate the relevant interface and code, and implement the requested changes.\n',
+    );
   });
 
   it('includes the Annotation note prominently for a single Annotation', () => {
@@ -40,7 +42,9 @@ describe('buildReportMarkdown', () => {
 
     const markdown = buildReportMarkdown(annotations);
 
-    expect(markdown).toContain('# ng-fixit Report');
+    expect(markdown).toContain(
+      'The following findings describe requested UI changes. Review each Annotation, use its Target details to locate the relevant interface and code, and implement the requested changes.',
+    );
     expect(markdown).toContain('## Annotation 1');
     expect(markdown).toContain('Fix the button label');
   });
@@ -126,7 +130,7 @@ describe('buildReportMarkdown', () => {
 
     expect(buildReportMarkdown(annotations)).toBe(
       [
-        '# ng-fixit Report',
+        'The following findings describe requested UI changes. Review each Annotation, use its Target details to locate the relevant interface and code, and implement the requested changes.',
         '',
         '## Annotation 1',
         '',
