@@ -1,6 +1,16 @@
 {
   "name": "ng-fixit-workspace",
   "version": "0.0.0",
+  "description": "Visual feedback and UI annotation library for Angular and AI coding agents.",
+  "keywords": [
+    "angular",
+    "ai-agent",
+    "coding-agent",
+    "visual-feedback",
+    "ui-annotation",
+    "browser-annotation",
+    "developer-tools"
+  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve ng-fixit-demo",
