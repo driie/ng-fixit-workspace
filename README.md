@@ -124,4 +124,4 @@ Issues and pull requests are welcome in the [GitHub repository](https://github.c
 
 ## License
 
-[MIT](https://github.com/driie/ng-fixit-workspace/blob/main/LICENSE) © David Riera
+[MIT](https://github.com/driie/ng-fixit-workspace/blob/main/LICENSE) © driie
