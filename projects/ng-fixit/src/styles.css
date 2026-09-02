@@ -1,5 +1,5 @@
 .fixit-root {
-  --accent: oklch(33.8% 0.109 20.5);
+  --accent: oklch(35% 0.13 20.5);
   --accent-soft: oklch(44.8% 0.11 18.1);
   --surface: oklch(96% 0.004 56.4);
   --surface-light: #fdfdfd;
@@ -19,8 +19,8 @@
   --fixit-color-accent-strong: color-mix(in oklch, var(--accent) 88%, var(--ink));
   --fixit-color-on-accent: var(--surface);
   --fixit-color-focus: var(--accent-soft);
-  --fixit-color-highlight-fill: color-mix(in oklch, var(--accent) 14%, transparent);
-  --fixit-color-highlight-fill-locked: color-mix(in oklch, var(--accent) 24%, transparent);
+  --fixit-color-highlight-fill: color-mix(in oklch, var(--accent) 8%, transparent);
+  --fixit-color-highlight-fill-locked: color-mix(in oklch, var(--accent) 16%, transparent);
   --fixit-color-shadow: color-mix(in oklch, var(--ink) 24%, transparent);
 
   display: contents;
