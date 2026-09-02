@@ -1,7 +1,23 @@
 {
   "name": "ng-fixit",
-  "version": "0.1.0",
-  "description": "Development-only Angular library that turns UI selections and correction notes into paste-ready Markdown for AI coding agents.",
+  "version": "0.1.1",
+  "description": "Visual feedback and UI annotation library for Angular that creates structured Markdown for AI coding agents.",
+  "keywords": [
+    "angular",
+    "angular-library",
+    "ai",
+    "ai-agent",
+    "coding-agent",
+    "developer-tools",
+    "devtools",
+    "visual-feedback",
+    "ui-annotation",
+    "browser-annotation",
+    "design-review",
+    "frontend",
+    "css-selector",
+    "markdown"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
