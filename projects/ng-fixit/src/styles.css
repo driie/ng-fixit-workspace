@@ -1,3 +1,9 @@
+@property --fixit-focus-sweep-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: -90deg;
+}
+
 .fixit-root {
   --accent: oklch(35% 0.13 20.5);
   --accent-soft: oklch(44.8% 0.11 18.1);
@@ -189,7 +195,63 @@
   border: 0;
 }
 
+.fixit-note-entry-input-frame {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--fixit-color-border-muted);
+  border-radius: 0.5rem;
+  background: var(--fixit-color-surface-raised);
+}
+
+.fixit-note-entry-input-frame::before {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--fixit-focus-sweep-angle),
+    transparent 0 70%,
+    var(--fixit-color-focus) 82%,
+    transparent 94%
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fixit-note-entry-input-frame::after {
+  position: absolute;
+  z-index: 2;
+  right: 4%;
+  bottom: 0;
+  left: 4%;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--fixit-color-focus);
+  content: '';
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.fixit-note-entry-input-frame:focus-within::before {
+  animation: fixit-focus-border-sweep 700ms ease-out both;
+}
+
+.fixit-note-entry-input-frame:focus-within::after {
+  animation: fixit-focus-border-settle 160ms 580ms ease-out both;
+}
+
 .fixit-note-entry-input {
+  position: relative;
+  z-index: 1;
   flex: 1 1 auto;
   min-width: 0;
   min-height: 2.125rem;
@@ -197,8 +259,8 @@
   padding: 0.5rem 0.625rem;
   overflow-y: hidden;
   box-sizing: border-box;
-  border: 1px solid var(--fixit-color-border-muted);
-  border-radius: 0.5rem;
+  border: 0;
+  border-radius: calc(0.5rem - 1px);
   background: var(--fixit-color-surface-raised);
   color: var(--fixit-color-text);
   font: inherit;
@@ -208,8 +270,30 @@
 }
 
 .fixit-note-entry-input:focus-visible {
-  outline: 2px solid var(--fixit-color-focus);
-  outline-offset: 2px;
+  outline: 0;
+}
+
+@keyframes fixit-focus-border-sweep {
+  from {
+    --fixit-focus-sweep-angle: -90deg;
+    opacity: 1;
+  }
+
+  82% {
+    opacity: 1;
+  }
+
+  to {
+    --fixit-focus-sweep-angle: 270deg;
+    opacity: 0;
+  }
+}
+
+@keyframes fixit-focus-border-settle {
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
 
 .fixit-note-entry-actions {
@@ -670,6 +754,16 @@ html:has([data-fixit-annotation-mode='on']) .fixit-root {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .fixit-note-entry-input-frame:focus-within::before,
+  .fixit-note-entry-input-frame:focus-within::after {
+    animation: none;
+  }
+
+  .fixit-note-entry-input-frame:focus-within::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
   .fixit-target-highlight,
   .fixit-annotation-list-item,
   .fixit-annotation-list-locator,
