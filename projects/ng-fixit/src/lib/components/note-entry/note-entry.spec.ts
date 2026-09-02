@@ -28,6 +28,12 @@ describe('NoteEntry', () => {
     expect(noteInput().rows).toBe(1);
   });
 
+  it('groups note controls without declaring a modal dialog', () => {
+    expect(fixture.nativeElement.getAttribute('role')).toBe('group');
+    expect(fixture.nativeElement.getAttribute('aria-modal')).toBeNull();
+    expect(fixture.nativeElement.getAttribute('aria-labelledby')).toBe('fixit-note-entry-label');
+  });
+
   it('labels the compact note actions', () => {
     const commit = fixture.nativeElement.querySelector(
       '[data-testid="fixit-note-entry-commit"]',

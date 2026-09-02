@@ -1,18 +1,55 @@
+@property --fixit-focus-sweep-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: -90deg;
+}
+
 .fixit-root {
-  --fixit-color-surface: #111827;
-  --fixit-color-surface-raised: #0b1220;
-  --fixit-color-border: #1f2937;
-  --fixit-color-border-muted: #374151;
-  --fixit-color-border-subtle: #4b5563;
-  --fixit-color-text: #f9fafb;
-  --fixit-color-text-secondary: #e5e7eb;
-  --fixit-color-text-muted: #d1d5db;
-  --fixit-color-text-faint: #9ca3af;
-  --fixit-color-accent: #2563eb;
-  --fixit-color-accent-strong: #1d4ed8;
-  --fixit-color-focus: #93c5fd;
-  --fixit-color-highlight-fill: rgb(37 99 235 / 12%);
-  --fixit-color-shadow: rgb(0 0 0 / 35%);
+  --fixit-color-accent: oklch(35% 0.13 20.5);
+  --fixit-color-focus: oklch(44.8% 0.11 18.1);
+  --fixit-color-surface: oklch(96% 0.004 56.4);
+  --fixit-color-surface-raised: #fdfdfd;
+  --fixit-color-surface-strong: oklch(65.5% 0.01 52);
+  --fixit-color-text: oklch(12.7% 0.007 18.1);
+  --fixit-color-border: color-mix(
+    in oklch,
+    var(--fixit-color-surface-strong) 48%,
+    var(--fixit-color-surface)
+  );
+  --fixit-color-border-muted: color-mix(
+    in oklch,
+    var(--fixit-color-surface-strong) 68%,
+    var(--fixit-color-surface)
+  );
+  --fixit-color-border-subtle: var(--fixit-color-surface-strong);
+  --fixit-color-text-secondary: color-mix(
+    in oklch,
+    var(--fixit-color-text) 78%,
+    var(--fixit-color-surface)
+  );
+  --fixit-color-text-muted: color-mix(
+    in oklch,
+    var(--fixit-color-text) 64%,
+    var(--fixit-color-surface)
+  );
+  --fixit-color-text-faint: color-mix(
+    in oklch,
+    var(--fixit-color-text) 52%,
+    var(--fixit-color-surface)
+  );
+  --fixit-color-accent-strong: color-mix(
+    in oklch,
+    var(--fixit-color-accent) 88%,
+    var(--fixit-color-text)
+  );
+  --fixit-color-on-accent: var(--fixit-color-surface);
+  --fixit-color-highlight-fill: color-mix(in oklch, var(--fixit-color-accent) 8%, transparent);
+  --fixit-color-highlight-fill-locked: color-mix(
+    in oklch,
+    var(--fixit-color-accent) 16%,
+    transparent
+  );
+  --fixit-color-shadow: color-mix(in oklch, var(--fixit-color-text) 24%, transparent);
 
   display: contents;
 }
@@ -88,17 +125,10 @@
   opacity: 0;
 }
 
-.fixit-chrome-button:hover {
-  border-color: var(--fixit-color-border-subtle);
-}
-
 .fixit-chrome-button[aria-pressed='true'] {
-  background: var(--fixit-color-accent);
   border-color: var(--fixit-color-accent-strong);
-}
-
-.fixit-chrome-button[aria-pressed='true']:hover {
-  background: var(--fixit-color-accent-strong);
+  background: var(--fixit-color-accent);
+  color: var(--fixit-color-on-accent);
 }
 
 .fixit-chrome-button:focus-visible {
@@ -112,6 +142,7 @@
   box-sizing: border-box;
   pointer-events: none;
   border: 2px solid var(--fixit-color-accent);
+  border-radius: 0.25rem;
   background: var(--fixit-color-highlight-fill);
   transition:
     top 120ms ease-out,
@@ -121,7 +152,7 @@
 }
 
 .fixit-target-highlight-locked {
-  background: rgb(37 99 235 / 22%);
+  background: var(--fixit-color-highlight-fill-locked);
 }
 
 .fixit-target-label {
@@ -133,7 +164,7 @@
   overflow: hidden;
   border-radius: 0.25rem 0.25rem 0 0;
   background: var(--fixit-color-accent);
-  color: var(--fixit-color-text);
+  color: var(--fixit-color-on-accent);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.6875rem;
   font-weight: 600;
@@ -178,7 +209,63 @@
   border: 0;
 }
 
+.fixit-note-entry-input-frame {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--fixit-color-border-muted);
+  border-radius: 0.5rem;
+  background: var(--fixit-color-surface-raised);
+}
+
+.fixit-note-entry-input-frame::before {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--fixit-focus-sweep-angle),
+    transparent 0 70%,
+    var(--fixit-color-focus) 82%,
+    transparent 94%
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fixit-note-entry-input-frame::after {
+  position: absolute;
+  z-index: 2;
+  right: 4%;
+  bottom: 0;
+  left: 4%;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--fixit-color-focus);
+  content: '';
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.fixit-note-entry-input-frame:focus-within::before {
+  animation: fixit-focus-border-sweep 700ms ease-out both;
+}
+
+.fixit-note-entry-input-frame:focus-within::after {
+  animation: fixit-focus-border-settle 160ms 580ms ease-out both;
+}
+
 .fixit-note-entry-input {
+  position: relative;
+  z-index: 1;
   flex: 1 1 auto;
   min-width: 0;
   min-height: 2.125rem;
@@ -186,8 +273,8 @@
   padding: 0.5rem 0.625rem;
   overflow-y: hidden;
   box-sizing: border-box;
-  border: 1px solid var(--fixit-color-border-muted);
-  border-radius: 0.5rem;
+  border: 0;
+  border-radius: calc(0.5rem - 1px);
   background: var(--fixit-color-surface-raised);
   color: var(--fixit-color-text);
   font: inherit;
@@ -197,8 +284,30 @@
 }
 
 .fixit-note-entry-input:focus-visible {
-  outline: 2px solid var(--fixit-color-focus);
-  outline-offset: 2px;
+  outline: 0;
+}
+
+@keyframes fixit-focus-border-sweep {
+  from {
+    --fixit-focus-sweep-angle: -90deg;
+    opacity: 1;
+  }
+
+  82% {
+    opacity: 1;
+  }
+
+  to {
+    --fixit-focus-sweep-angle: 270deg;
+    opacity: 0;
+  }
+}
+
+@keyframes fixit-focus-border-settle {
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
 
 .fixit-note-entry-actions {
@@ -239,22 +348,13 @@
 .fixit-note-entry-commit {
   border: 1px solid var(--fixit-color-accent-strong);
   background: var(--fixit-color-accent);
-  color: var(--fixit-color-text);
-}
-
-.fixit-note-entry-commit:hover {
-  background: var(--fixit-color-accent-strong);
+  color: var(--fixit-color-on-accent);
 }
 
 .fixit-note-entry-cancel {
   border: 1px solid var(--fixit-color-border-subtle);
   background: transparent;
   color: var(--fixit-color-text-secondary);
-}
-
-.fixit-note-entry-cancel:hover {
-  border-color: var(--fixit-color-border-muted);
-  color: var(--fixit-color-text);
 }
 
 .fixit-note-entry-commit:focus-visible,
@@ -306,10 +406,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.5rem;
+  flex: 0 0 1.5rem;
+  width: 1.5rem;
   height: 1.5rem;
-  padding: 0 0.375rem;
-  border-radius: 999px;
+  padding: 0;
+  border-radius: 50%;
   background: var(--fixit-color-surface-raised);
   color: var(--fixit-color-text-secondary);
   font-size: 0.75rem;
@@ -355,8 +456,8 @@
   flex-direction: column;
   gap: 0.625rem;
   min-height: 0;
-  margin: -0.25rem;
-  padding: 0.25rem;
+  margin: 0;
+  padding: 0.5rem;
   overflow: auto;
   scrollbar-color: var(--fixit-color-border-subtle) transparent;
   scrollbar-gutter: stable;
@@ -396,6 +497,7 @@
   font: inherit;
   font-size: 0.8125rem;
   line-height: 1.35;
+  cursor: pointer;
   transform-origin: center;
   transition:
     border-color 160ms ease,
@@ -405,6 +507,20 @@
 .fixit-annotation-list-item:hover {
   border-color: var(--fixit-color-border-subtle);
   transform: scale(1.02);
+}
+
+.fixit-annotation-list-item-editing:hover {
+  transform: none;
+}
+
+.fixit-note-entry-inline {
+  position: static;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .fixit-annotation-list-header {
@@ -428,7 +544,7 @@
   padding: 0;
   overflow: hidden;
   border: 0;
-  background: transparent;
+  background: var(--fixit-color-surface-raised);
   color: var(--fixit-color-text);
   font: inherit;
   line-height: inherit;
@@ -440,6 +556,7 @@
 
 .fixit-annotation-list-locator {
   padding: 0.125rem 0.3rem;
+  background: var(--fixit-color-surface);
   color: var(--fixit-color-text-faint);
   border-radius: 0.25rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -451,7 +568,7 @@
 
 .fixit-annotation-list-item:hover .fixit-annotation-list-locator {
   background: var(--fixit-color-accent);
-  color: var(--fixit-color-text);
+  color: var(--fixit-color-on-accent);
 }
 
 .fixit-annotation-list-delete,
@@ -461,19 +578,12 @@
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--fixit-color-border-subtle);
   border-radius: 0.375rem;
-  background: transparent;
+  background: var(--fixit-color-surface-raised);
   color: var(--fixit-color-text-secondary);
   font: inherit;
   font-size: 0.75rem;
   line-height: 1.25;
   cursor: pointer;
-}
-
-.fixit-annotation-list-delete:hover,
-.fixit-annotation-list-copy:hover,
-.fixit-annotation-list-clear:hover {
-  color: var(--fixit-color-text);
-  border-color: var(--fixit-color-border-muted);
 }
 
 .fixit-annotation-list-note:focus-visible,
@@ -587,16 +697,43 @@
   cursor: pointer;
 }
 
-.fixit-copy-toast-clear:hover,
-.fixit-copy-toast-close:hover {
-  color: var(--fixit-color-text);
-  border-color: var(--fixit-color-border-muted);
-}
-
 .fixit-copy-toast-clear:focus-visible,
 .fixit-copy-toast-close:focus-visible {
   outline: 2px solid var(--fixit-color-focus);
   outline-offset: 2px;
+}
+
+.fixit-chrome-button,
+.fixit-note-entry-commit,
+.fixit-note-entry-cancel,
+.fixit-annotation-list-delete,
+.fixit-annotation-list-copy,
+.fixit-annotation-list-clear,
+.fixit-copy-toast-clear,
+.fixit-copy-toast-close {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.fixit-chrome-button:hover,
+.fixit-note-entry-commit:hover,
+.fixit-note-entry-cancel:hover,
+.fixit-annotation-list-delete:hover,
+.fixit-annotation-list-copy:hover,
+.fixit-annotation-list-clear:hover,
+.fixit-copy-toast-clear:hover,
+.fixit-copy-toast-close:hover {
+  border-color: var(--fixit-color-accent);
+  background: var(--fixit-color-accent);
+  color: var(--fixit-color-on-accent);
+}
+
+.fixit-chrome-button[aria-pressed='true']:hover,
+.fixit-note-entry-commit:hover {
+  border-color: var(--fixit-color-accent-strong);
+  background: var(--fixit-color-accent-strong);
 }
 
 html:has([data-fixit-annotation-mode='on']),
@@ -609,6 +746,16 @@ html:has([data-fixit-annotation-mode='on']) .fixit-root {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .fixit-note-entry-input-frame:focus-within::before,
+  .fixit-note-entry-input-frame:focus-within::after {
+    animation: none;
+  }
+
+  .fixit-note-entry-input-frame:focus-within::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
   .fixit-target-highlight,
   .fixit-annotation-list-item,
   .fixit-annotation-list-locator,
@@ -620,5 +767,17 @@ html:has([data-fixit-annotation-mode='on']) .fixit-root {
 
   .fixit-copy-toast:not([hidden]):hover {
     transform: translateX(-50%);
+  }
+}
+
+@media (forced-colors: active) {
+  .fixit-note-entry-input-frame:focus-within {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
+  }
+
+  .fixit-note-entry-input-frame:focus-within::before,
+  .fixit-note-entry-input-frame:focus-within::after {
+    display: none;
   }
 }

@@ -20,7 +20,7 @@
   class="fixit-target-highlight"
   data-fixit-chrome
   data-testid="fixit-target-highlight"
-  [class.fixit-target-highlight-locked]="highlightLocked()"
+  [class.fixit-target-highlight-locked]="createDraftActive()"
   [style.top]="box.top"
   [style.left]="box.left"
   [style.width]="box.width"
@@ -30,7 +30,7 @@
   <span class="fixit-target-label" data-testid="fixit-target-label">{{ label }}</span>
   }
 </div>
-} @if (draft()) { @if (noteEntryPosition(); as position) {
+} @if (createDraftActive()) { @if (noteEntryPosition(); as position) {
 <fixit-note-entry
   [attr.data-placement]="position.placement"
   [style.top]="position.top"

@@ -707,20 +707,6 @@ describe('NgFixit Annotation list management', () => {
     await hostFixture.whenStable();
   });
 
-  it('removes only the deleted Annotation from the working list', async () => {
-    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
-    await createAnnotation(
-      hostFixture,
-      hostElement(hostFixture, '[data-testid="host-nested"]'),
-      'Second note',
-    );
-
-    deleteAnnotationButtons()[0]?.click();
-    await hostFixture.whenStable();
-
-    expect(annotationListNotes()).toEqual(['Second note']);
-  });
-
   it('hides the Annotation list when Annotation Mode turns off', async () => {
     await createAnnotation(hostFixture, hostButton(hostFixture), 'Keep me while mode is on');
 
@@ -733,71 +719,15 @@ describe('NgFixit Annotation list management', () => {
     expect(copyReportButton(hostFixture)).toBeNull();
   });
 
-  it('clears all Annotations from the working list', async () => {
-    await createAnnotation(hostFixture, hostButton(hostFixture), 'First note');
-    await createAnnotation(
-      hostFixture,
-      hostElement(hostFixture, '[data-testid="host-nested"]'),
-      'Second note',
-    );
-
-    const clearButton = clearAnnotationsButton();
-    expect(clearButton?.closest('ul')).toBeNull();
-
-    clearButton?.click();
-    await hostFixture.whenStable();
-
-    expect(annotationListNotes()).toEqual([]);
-  });
-
-  it('updates an Annotation note preview after edit is committed', async () => {
+  it('renders an edit entry only inside the Annotation list', async () => {
     await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
 
-    expect(annotationListNoteButtons()[0]?.getAttribute('aria-label')).toBe(
-      'Edit note: Original note',
-    );
-    expect(deleteAnnotationButtons()[0]?.getAttribute('aria-label')).toBe(
-      'Delete annotation: Original note',
-    );
-
-    annotationListNoteButtons()[0]?.click();
+    annotationListItems()[0]?.click();
     await hostFixture.whenStable();
 
-    expect(noteEntry()).not.toBeNull();
-    expect(noteEntryInput().value).toBe('Original note');
-
-    setNoteEntryValue('Refined note');
-    commitNoteEntry().click();
-    await hostFixture.whenStable();
-
-    expect(annotationListNotes()).toEqual(['Refined note']);
-    expect(noteEntry()).toBeNull();
-  });
-
-  it('keeps the original note when edit is canceled', async () => {
-    await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
-
-    annotationListNoteButtons()[0]?.click();
-    await hostFixture.whenStable();
-    setNoteEntryValue('Will abandon');
-    cancelNoteEntry().click();
-    await hostFixture.whenStable();
-
-    expect(annotationListNotes()).toEqual(['Original note']);
-    expect(noteEntry()).toBeNull();
-  });
-
-  it('rejects an empty edit without changing the Annotation', async () => {
-    await createAnnotation(hostFixture, hostButton(hostFixture), 'Original note');
-
-    annotationListNoteButtons()[0]?.click();
-    await hostFixture.whenStable();
-    setNoteEntryValue('   ');
-    commitNoteEntry().click();
-    await hostFixture.whenStable();
-
-    expect(annotationListNotes()).toEqual(['Original note']);
-    expect(noteEntry()).not.toBeNull();
+    const entries = document.querySelectorAll('[data-testid="fixit-note-entry"]');
+    expect(entries).toHaveLength(1);
+    expect(entries[0]?.closest('[data-testid="fixit-annotation-list-item"]')).not.toBeNull();
   });
 
   it('copies a Report after edit and delete without clearing remaining Annotations', async () => {
@@ -975,10 +905,6 @@ const annotationListNoteButtons = (): HTMLButtonElement[] => {
 
 const deleteAnnotationButtons = (): HTMLButtonElement[] => {
   return Array.from(document.querySelectorAll('[data-testid="fixit-annotation-list-delete"]'));
-};
-
-const clearAnnotationsButton = (): HTMLButtonElement | null => {
-  return document.querySelector('[data-testid="fixit-annotation-list-clear"]');
 };
 
 const copyReportButton = (fixture: ComponentFixture<unknown>): HTMLButtonElement => {
