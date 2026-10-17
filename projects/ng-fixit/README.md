@@ -12,7 +12,21 @@ Select a Target in your Angular app, add a correction note, and copy a Markdown 
 
 ## Install
 
-Install ng-fixit as a development dependency:
+Install ng-fixit as a development dependency using your preferred package manager:
+
+npm:
+
+```bash
+npm install --save-dev ng-fixit
+```
+
+Yarn:
+
+```bash
+yarn add --dev ng-fixit
+```
+
+pnpm:
 
 ```bash
 pnpm add -D ng-fixit

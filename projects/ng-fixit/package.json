@@ -1,6 +1,6 @@
 {
   "name": "ng-fixit",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Visual feedback and UI annotation library for Angular that creates structured Markdown for AI coding agents.",
   "keywords": [
     "angular",
